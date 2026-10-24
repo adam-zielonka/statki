@@ -21,6 +21,7 @@ jobs:
       - uses: pnpm/action-setup@v6
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=high
+      - run: pnpm lint
       - run: pnpm build
       - uses: actions/upload-pages-artifact@v5
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
