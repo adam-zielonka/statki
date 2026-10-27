@@ -1,24 +1,24 @@
-# Statki
+# Ships
 
-Klasyczna bitwa morska dla jednego gracza, z polskim interfejsem na komputer i telefon.
-Przed startem wybierz przeciwnika i wylosuj swoją flotę. Trafienie daje kolejny strzał,
-a pudło przekazuje turę. Statki nie stykają się, również po przekątnej.
-Woda wokół zatopionego statku jest oznaczana automatycznie.
+Classic single-player Battleship with an English interface for desktop and mobile.
+Choose an opponent and shuffle your fleet before starting. A hit gives you another
+shot; a miss passes the turn. Ships cannot touch, even diagonally.
+Water around a sunk ship is marked automatically.
 
-## Przeciwnicy
+## Opponents
 
-- **Felek — odkrywca:** losuje nieodkryte pola.
-- **Hugo — łowca:** po trafieniu bada sąsiednie pola i kontynuuje linię statku.
-- **Ada — strategini:** łączy pościg za trafionym statkiem z przeszukiwaniem w szachownicę;
-  po zatopieniu wszystkich większych statków przeszukuje pozostałe pola.
-- **Lena — nawigatorka:** zlicza legalne położenia pozostałych statków i wybiera pola
-  o największej liczbie pasujących układów; po trafieniu skupia się na dobiciu statku.
+- **Felek — Explorer:** picks unexplored squares at random.
+- **Hugo — Hunter:** follows up on hits by checking adjacent squares and pursuing the ship's line.
+- **Ada — Strategist:** combines hit pursuit with a checkerboard search;
+  switches to all remaining squares once every larger ship has been sunk.
+- **Lena — Navigator:** counts legal placements of the remaining ships and targets
+  squares with the most matching placements; follows up on hits to finish a ship.
 
-Każdy przeciwnik otrzymuje wyłącznie wyniki dotychczasowych strzałów oraz rozmiary
-pozostałych statków. Ukryte położenia floty nie są przekazywane algorytmom.
+Every opponent receives only previous shot results and the sizes of ships still
+afloat. Hidden ship positions are never passed to the algorithms.
 
-Dostępne są pauza, rewanż, licznik floty, historia strzałów i podsumowanie celności.
-Pauza i nowa gra anulują oczekujące ruchy komputera. Planszę można obsługiwać
-klawiaturą: Tab, strzałki oraz Enter lub spacja.
+Includes pause, rematches, fleet counters, shot history and an accuracy summary.
+Pausing or starting a new game cancels pending computer moves. The grid supports
+keyboard controls: Tab, arrow keys, and Enter or Space.
 
 See [DEVELOPMENT.md](DEVELOPMENT.md) for local setup and validation.

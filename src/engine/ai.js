@@ -2,38 +2,38 @@ export const OPPONENTS = [
   {
     id: "random",
     name: "Felek",
-    role: "Odkrywca",
-    level: "Na rozgrzewkę",
+    role: "Explorer",
+    level: "A gentle start",
     icon: "✦",
     description:
-      "Strzela losowo. Lubi niespodzianki i daje Ci czas na znalezienie własnej taktyki.",
+      "Fires at random. Loves surprises and gives you time to find your own tactics.",
   },
   {
     id: "hunter",
     name: "Hugo",
-    role: "Łowca",
-    level: "Czujny rywal",
+    role: "Hunter",
+    level: "Stay alert",
     icon: "⌖",
     description:
-      "Szuka losowo, ale po trafieniu sprawdza sąsiadów i podąża wzdłuż statku.",
+      "Searches at random, then follows each hit along the length of the ship.",
   },
   {
     id: "parity",
     name: "Ada",
-    role: "Strategini",
-    level: "Krok do przodu",
+    role: "Strategist",
+    level: "One step ahead",
     icon: "◇",
     description:
-      "Szuka w szachownicę i dobija trafione statki. Nie pomija też pojedynczych masztów.",
+      "Searches in a checkerboard pattern and follows up on hits. Finds single-cell ships, too.",
   },
   {
     id: "sonar",
     name: "Lena",
-    role: "Nawigatorka",
-    level: "Pełne skupienie",
+    role: "Navigator",
+    level: "Keep your focus",
     icon: "◉",
     description:
-      "Liczy możliwe położenia pozostałych statków. Celuje tam, gdzie pasuje najwięcej układów.",
+      "Counts possible ship placements and targets squares that fit the most possibilities.",
   },
 ];
 

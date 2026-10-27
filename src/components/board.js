@@ -1,11 +1,11 @@
 import { coordinate } from "../engine/board.js";
 
 const labels = {
-  unknown: "nieodkryte",
-  miss: "pudło",
-  blocked: "woda przy zatopionym statku",
-  hit: "trafiony",
-  sunk: "zatopiony",
+  unknown: "unexplored",
+  miss: "miss",
+  blocked: "water around a sunk ship",
+  hit: "hit",
+  sunk: "sunk",
 };
 
 export function createBoard(element, onShot) {
@@ -70,7 +70,7 @@ export function createBoard(element, onShot) {
         button.disabled = !interactive || cell.state !== "unknown";
         button.setAttribute(
           "aria-label",
-          `${coordinate(row, col)}: ${visibleShip ? "statek" : labels[cell.state]}`,
+          `${coordinate(row, col)}: ${visibleShip ? "ship" : labels[cell.state]}`,
         );
       }
     }

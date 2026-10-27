@@ -9,12 +9,6 @@ const updateEnemy = createBoard($("enemy-board"), (row, col) =>
   game.fire(row, col),
 );
 const updatePlayer = createBoard($("player-board"));
-const possessive = {
-  random: "Felka",
-  hunter: "Hugona",
-  parity: "Ady",
-  sonar: "Leny",
-};
 
 for (const opponent of OPPONENTS) {
   const button = document.createElement("button");
@@ -41,7 +35,7 @@ function fleet(id, board) {
     const index = counts.indexOf(length),
       alive = index !== -1;
     if (alive) counts.splice(index, 1);
-    const label = `${length} ${length === 1 ? "maszt" : "maszty"}: ${alive ? "pływa" : "zatopiony"}`;
+    const label = `${length}-cell ship: ${alive ? "afloat" : "sunk"}`;
     return `<span class="mini-ship ${alive ? "" : "lost"}" aria-label="${label}">
       ${"<i></i>".repeat(length)}</span>`;
   }).join("");
@@ -56,40 +50,40 @@ function update() {
   const latest = game.history[0];
   let title, detail, phase;
   if (setup) {
-    phase = "PRZYGOTOWANIE";
-    title = "Twoja flota czeka";
+    phase = "GETTING READY";
+    title = "Your fleet is ready";
     detail =
-      "Wylosuj ustawienie i rozpocznij bitwę. Pierwszy strzał należy do Ciebie.";
+      "Shuffle your fleet and start the battle. The first shot is yours.";
   } else if (over) {
-    phase = "KONIEC BITWY";
+    phase = "BATTLE OVER";
     title =
       game.winner === "player"
-        ? "Zwycięstwo! Morze jest Twoje."
-        : `${opponent.name} wygrywa tę bitwę`;
+        ? "Victory! The sea is yours."
+        : `${opponent.name} wins this battle`;
     const accuracy = Math.round(
       (game.enemy.hits / (game.shots.player || 1)) * 100,
     );
-    detail = `Twoje strzały: ${game.shots.player} · Celność: ${accuracy}% · Rewanż? Rozpocznij nową grę.`;
+    detail = `Your shots: ${game.shots.player} · Accuracy: ${accuracy}% · Ready for a rematch? Start a new game.`;
   } else if (game.paused) {
-    phase = "CHWILA W PRZYSTANI";
-    title = "Bitwa wstrzymana";
-    detail = "Floty poczekają. Wznów grę, kiedy będziesz gotów.";
+    phase = "BACK IN PORT";
+    title = "Battle paused";
+    detail = "The fleets can wait. Resume whenever you are ready.";
   } else {
-    phase = yourTurn ? "TWÓJ RUCH" : "RUCH PRZECIWNIKA";
+    phase = yourTurn ? "YOUR TURN" : "ENEMY TURN";
     title = yourTurn
-      ? "Obierz kurs. Wybierz pole."
-      : `${opponent.name} wybiera cel…`;
+      ? "Set your course. Pick a square."
+      : `${opponent.name} is choosing a target…`;
     detail = latest
-      ? `${latest.actor === "player" ? "Twój strzał" : opponent.name} · ${latest.coordinate} · ${
+      ? `${latest.actor === "player" ? "Your shot" : opponent.name} · ${latest.coordinate} · ${
         latest.sunk
-          ? "Trafiony, zatopiony!"
+          ? "Hit and sunk!"
           : latest.hit
             ? latest.actor === "player"
-              ? "Trafiony! Strzelaj dalej."
-              : "Trafiony! Rywal strzela dalej."
-            : "Pudło. Zmiana tury."
+              ? "Hit! Fire again."
+              : "Hit! Your opponent fires again."
+            : "Miss. The turn passes."
       }`
-      : "Kliknij pole na wodach przeciwnika. Powodzenia, kapitanie!";
+      : "Pick a square in enemy waters. Good luck, captain!";
   }
   $("phase-label").textContent = phase;
   $("status-title").textContent = title;
@@ -99,13 +93,13 @@ function update() {
   $("start").hidden = !setup;
   $("shuffle").hidden = !setup;
   $("pause").hidden = setup || over;
-  $("pause").textContent = game.paused ? "Wznów bitwę" : "Pauza";
+  $("pause").textContent = game.paused ? "Resume battle" : "Pause";
   $("pause").setAttribute("aria-pressed", String(game.paused));
   $("new-game").hidden = setup;
-  $("new-game").textContent = over ? "Zagraj ponownie ↗" : "Nowa gra";
+  $("new-game").textContent = over ? "Play again ↗" : "New game";
   $("opponent-hint").textContent = setup
-    ? "Wybierz styl przeciwnika"
-    : "Zmiana rywala przy nowej grze";
+    ? "Find your kind of challenge"
+    : "Change rivals in a new game";
   for (const button of $("opponents").children) {
     button.setAttribute(
       "aria-pressed",
@@ -113,12 +107,12 @@ function update() {
     );
     button.disabled = !setup;
   }
-  $("enemy-title").textContent = `Flota ${possessive[game.strategy]}`;
-  $("enemy-count").textContent = `${game.enemy.remaining.length} / 10 statków`;
+  $("enemy-title").textContent = `${opponent.name}'s fleet`;
+  $("enemy-count").textContent = `Ships: ${game.enemy.remaining.length} / 10`;
   $("player-count").textContent =
-    `${game.player.remaining.length} / 10 statków`;
-  $("enemy-shots").textContent = `Twoje strzały: ${game.shots.player}`;
-  $("player-shots").textContent = `Strzały rywala: ${game.shots.enemy}`;
+    `Ships: ${game.player.remaining.length} / 10`;
+  $("enemy-shots").textContent = `Your shots: ${game.shots.player}`;
+  $("player-shots").textContent = `Enemy shots: ${game.shots.enemy}`;
   document
     .querySelector(".enemy-panel")
     .classList.toggle("ready", !setup && !over && yourTurn && !game.paused);
@@ -138,11 +132,11 @@ function update() {
       .map(
         (item) => `<li>
     <span class="log-mark ${item.hit ? "hit" : ""}" aria-hidden="true">${item.hit ? "×" : "·"}</span>
-    <span>${item.actor === "player" ? "Ty" : opponent.name}<strong>${item.coordinate}</strong></span>
-    <span class="log-result">${item.sunk ? "Zatopiony" : item.hit ? "Trafiony" : "Pudło"}</span></li>`,
+    <span>${item.actor === "player" ? "You" : opponent.name}<strong>${item.coordinate}</strong></span>
+    <span class="log-result">${item.sunk ? "Sunk" : item.hit ? "Hit" : "Miss"}</span></li>`,
       )
       .join("")
-    : "<li class=\"empty-log\">Tu zapiszemy przebieg Twojej bitwy.<br>Każdy strzał to nowa wskazówka.</li>";
+    : "<li class=\"empty-log\">Your battle will be recorded here.<br>Every shot brings a new clue.</li>";
 }
 
 $("start").addEventListener("click", () => {
