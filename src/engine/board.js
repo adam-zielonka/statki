@@ -1,93 +1,72 @@
-import { generateShips, getXY, printBoardInConsole } from "../utils";
+import { generateShips, getXY } from "../utils.js";
+
+export const FLEET = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
+export const coordinate = (row, col) =>
+  `${String.fromCharCode(65 + row)}${col + 1}`;
 
 export class Board {
-  constructor({color, opponent, ships}) {  
-    this.color = color;
-    this.opponent = opponent;
-    this.ships = ships;
-    this.boxes = [];
-    for (let i = 0; i < 10; i++) {
-      this.boxes[i] = [];
-      for (let j = 0; j < 10; j++)
-        this.boxes[i][j] = {
-          ship: false,
-          shot: false,
-          color: color,
-          shoot: () => this.shoot(i, j)
-        };
-    }
-    this.setShips(false);
-  }
-  
-  reset = () => {
-    this.boxes.forEach(row => {
-      row.forEach(box => {
-        box.ship = false;
-        box.shot = false;
-      });
-    });
-    this.setShips();
-  };
-  
-  isShipDown = (ship) => {
-    for (let mast of ship) {
-      const [x, y] = getXY(mast);
-      if (!this.boxes[x][y].shot) return false;
-    }
-    return true;
-  };
-  
-  shoot = (x, y) => {
-    let won = true;
-    this.boxes[x][y].shot = true;
-    for (let ship of this.ships) {
-      if (this.isShipDown(ship)) {
-        this.shipDown(ship);
-      } else {
-        won = false;
-      }
-    }
-    return [this.boxes[x][y].ship, won];
-  };
-  
-  shipDown = (ship) => {
-    for (let mast of ship) {
-      const [x, y] = getXY(mast);
-      this.setMishits(x, y);
-    }
-  };
-  
-  setMishits = (i, j) => {
-    if (i-1>=0 && j-1>=0) 
-      this.boxes[i-1][j-1].shot = true;
-    if (i-1>=0) 
-      this.boxes[i-1][j].shot = true;
-    if (i-1>=0 && j+1<10) 
-      this.boxes[i-1][j+1].shot = true;
-    if (j+1<10) 
-      this.boxes[i][j+1].shot = true;
-    if (j-1>=0) 
-      this.boxes[i][j-1].shot = true;
-    if (i+1<10 && j+1<10) 
-      this.boxes[i+1][j+1].shot = true;
-    if (i+1<10 && j-1>=0) 
-      this.boxes[i+1][j-1].shot = true;
-    if (i+1<10) 
-      this.boxes[i+1][j].shot = true;
-  };
-  
-  getBox = (x, y) => {
-    return this.boxes[x][y];
-  };
-  
-  setShips = (generate = true) => {
-    if (generate) this.ships = generateShips();
+  constructor(ships = generateShips()) {
+    this.ships = ships.map((ship) => ship.map((id) => getXY(id)));
+    this.cells = Array.from({ length: 10 }, () =>
+      Array.from({ length: 10 }, () => ({
+        ship: false,
+        state: "unknown",
+      })),
+    );
     for (const ship of this.ships) {
-      for (const mast of ship) {
-        const [x, y] = getXY(mast);
-        this.boxes[x][y].ship = true;
+      for (const [row, col] of ship) this.cells[row][col].ship = true;
+    }
+  }
+
+  isSunk(ship) {
+    return ship.every(([row, col]) =>
+      ["hit", "sunk"].includes(this.cells[row][col].state),
+    );
+  }
+
+  get remaining() {
+    return this.ships
+      .filter((ship) => !this.isSunk(ship))
+      .map((ship) => ship.length);
+  }
+
+  get hits() {
+    return this.cells
+      .flat()
+      .filter((cell) => ["hit", "sunk"].includes(cell.state)).length;
+  }
+
+  // Expose revealed information only; never pass hidden ships or cell references to an AI.
+  knowledge() {
+    return {
+      cells: this.cells.map((row) => row.map((cell) => cell.state)),
+      remaining: this.remaining,
+    };
+  }
+
+  shoot(row, col) {
+    const cell = this.cells[row]?.[col];
+    if (!cell || cell.state !== "unknown") return null;
+    cell.state = cell.ship ? "hit" : "miss";
+    let sunk = 0;
+    if (cell.ship) {
+      const ship = this.ships.find((parts) =>
+        parts.some(([r, c]) => r === row && c === col),
+      );
+      if (this.isSunk(ship)) {
+        sunk = ship.length;
+        for (const [r, c] of ship) {
+          this.cells[r][c].state = "sunk";
+          for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+              const neighbor = this.cells[r + dr]?.[c + dc];
+              if (neighbor && !neighbor.ship && neighbor.state === "unknown")
+                neighbor.state = "blocked";
+            }
+          }
+        }
       }
     }
-    printBoardInConsole(this.boxes, this.color);
-  };
+    return { hit: cell.ship, sunk, won: this.remaining.length === 0, row, col };
+  }
 }

@@ -1,15 +1,159 @@
-import { Board } from "./components/board";
-import { game } from "./engine/game";
+import { createBoard } from "./components/board.js";
+import { Game } from "./engine/game.js";
+import { OPPONENTS } from "./engine/ai.js";
+import { FLEET } from "./engine/board.js";
 
-document.getElementById("boards").append(Board(game.playerRed));
-document.getElementById("boards").append(Board(game.playerGreen));
+const game = new Game();
+const $ = (id) => document.getElementById(id);
+const updateEnemy = createBoard($("enemy-board"), (row, col) =>
+  game.fire(row, col),
+);
+const updatePlayer = createBoard($("player-board"));
+const possessive = {
+  random: "Felka",
+  hunter: "Hugona",
+  parity: "Ady",
+  sonar: "Leny",
+};
 
-document.getElementById("newGame").addEventListener("click", game.newGame);
-
-function update() {
-  document.getElementById("ai").className = !game.activePlayer ? "active" : "";
-  document.getElementById("pl").className = game.activePlayer ? "active" : "";
+for (const opponent of OPPONENTS) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "opponent";
+  button.dataset.id = opponent.id;
+  button.setAttribute("aria-pressed", "false");
+  const icon = opponent.id === "hunter"
+    ? `<svg viewBox="0 0 24 24" width="22" height="22" fill="none"
+        stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="6"/>
+        <path d="M12 2v6m0 8v6M2 12h6m8 0h6"/></svg>`
+    : opponent.icon;
+  button.innerHTML = `<span class="opponent-top"><span class="avatar" aria-hidden="true">${icon}</span>
+    <span class="opponent-level">${opponent.level}</span><span class="selection" aria-hidden="true">✓</span></span>
+    <span class="opponent-name">${opponent.name} <span>${opponent.role}</span></span>
+    <span class="opponent-description">${opponent.description}</span>`;
+  button.addEventListener("click", () => game.selectOpponent(opponent.id));
+  $("opponents").append(button);
 }
 
+function fleet(id, board) {
+  const counts = [...board.remaining];
+  $(id).innerHTML = FLEET.map((length) => {
+    const index = counts.indexOf(length),
+      alive = index !== -1;
+    if (alive) counts.splice(index, 1);
+    const label = `${length} ${length === 1 ? "maszt" : "maszty"}: ${alive ? "pływa" : "zatopiony"}`;
+    return `<span class="mini-ship ${alive ? "" : "lost"}" aria-label="${label}">
+      ${"<i></i>".repeat(length)}</span>`;
+  }).join("");
+}
+
+function update() {
+  const opponent = OPPONENTS.find((item) => item.id === game.strategy);
+  const setup = game.phase === "setup",
+    over = game.phase === "over";
+  const yourTurn = game.turn === "player";
+  document.querySelector(".battle").classList.toggle("in-progress", !setup);
+  const latest = game.history[0];
+  let title, detail, phase;
+  if (setup) {
+    phase = "PRZYGOTOWANIE";
+    title = "Twoja flota czeka";
+    detail =
+      "Wylosuj ustawienie i rozpocznij bitwę. Pierwszy strzał należy do Ciebie.";
+  } else if (over) {
+    phase = "KONIEC BITWY";
+    title =
+      game.winner === "player"
+        ? "Zwycięstwo! Morze jest Twoje."
+        : `${opponent.name} wygrywa tę bitwę`;
+    const accuracy = Math.round(
+      (game.enemy.hits / (game.shots.player || 1)) * 100,
+    );
+    detail = `Twoje strzały: ${game.shots.player} · Celność: ${accuracy}% · Rewanż? Rozpocznij nową grę.`;
+  } else if (game.paused) {
+    phase = "CHWILA W PRZYSTANI";
+    title = "Bitwa wstrzymana";
+    detail = "Floty poczekają. Wznów grę, kiedy będziesz gotów.";
+  } else {
+    phase = yourTurn ? "TWÓJ RUCH" : "RUCH PRZECIWNIKA";
+    title = yourTurn
+      ? "Obierz kurs. Wybierz pole."
+      : `${opponent.name} wybiera cel…`;
+    detail = latest
+      ? `${latest.actor === "player" ? "Twój strzał" : opponent.name} · ${latest.coordinate} · ${
+        latest.sunk
+          ? "Trafiony, zatopiony!"
+          : latest.hit
+            ? latest.actor === "player"
+              ? "Trafiony! Strzelaj dalej."
+              : "Trafiony! Rywal strzela dalej."
+            : "Pudło. Zmiana tury."
+      }`
+      : "Kliknij pole na wodach przeciwnika. Powodzenia, kapitanie!";
+  }
+  $("phase-label").textContent = phase;
+  $("status-title").textContent = title;
+  $("status-detail").textContent = detail;
+  $("status-dot").className =
+    `status-dot ${!setup && !over && !game.paused ? "live" : ""}`;
+  $("start").hidden = !setup;
+  $("shuffle").hidden = !setup;
+  $("pause").hidden = setup || over;
+  $("pause").textContent = game.paused ? "Wznów bitwę" : "Pauza";
+  $("pause").setAttribute("aria-pressed", String(game.paused));
+  $("new-game").hidden = setup;
+  $("new-game").textContent = over ? "Zagraj ponownie ↗" : "Nowa gra";
+  $("opponent-hint").textContent = setup
+    ? "Wybierz styl przeciwnika"
+    : "Zmiana rywala przy nowej grze";
+  for (const button of $("opponents").children) {
+    button.setAttribute(
+      "aria-pressed",
+      String(button.dataset.id === game.strategy),
+    );
+    button.disabled = !setup;
+  }
+  $("enemy-title").textContent = `Flota ${possessive[game.strategy]}`;
+  $("enemy-count").textContent = `${game.enemy.remaining.length} / 10 statków`;
+  $("player-count").textContent =
+    `${game.player.remaining.length} / 10 statków`;
+  $("enemy-shots").textContent = `Twoje strzały: ${game.shots.player}`;
+  $("player-shots").textContent = `Strzały rywala: ${game.shots.enemy}`;
+  document
+    .querySelector(".enemy-panel")
+    .classList.toggle("ready", !setup && !over && yourTurn && !game.paused);
+  updateEnemy(game.enemy, {
+    interactive: !setup && !over && yourTurn && !game.paused,
+    reveal: over,
+    last: game.history.find((item) => item.actor === "player"),
+  });
+  updatePlayer(game.player, {
+    reveal: true,
+    last: game.history.find((item) => item.actor === "enemy"),
+  });
+  fleet("enemy-fleet", game.enemy);
+  fleet("player-fleet", game.player);
+  $("history").innerHTML = game.history.length
+    ? game.history
+      .map(
+        (item) => `<li>
+    <span class="log-mark ${item.hit ? "hit" : ""}" aria-hidden="true">${item.hit ? "×" : "·"}</span>
+    <span>${item.actor === "player" ? "Ty" : opponent.name}<strong>${item.coordinate}</strong></span>
+    <span class="log-result">${item.sunk ? "Zatopiony" : item.hit ? "Trafiony" : "Pudło"}</span></li>`,
+      )
+      .join("")
+    : "<li class=\"empty-log\">Tu zapiszemy przebieg Twojej bitwy.<br>Każdy strzał to nowa wskazówka.</li>";
+}
+
+$("start").addEventListener("click", () => {
+  game.start();
+  $("enemy-board").querySelector("button:not(:disabled)")?.focus();
+});
+$("shuffle").addEventListener("click", () => game.shuffleFleet());
+$("pause").addEventListener("click", () => game.togglePause());
+$("new-game").addEventListener("click", () => {
+  game.newGame();
+  $("start").focus();
+});
+game.listeners.add(update);
 update();
-game.register.push(update);

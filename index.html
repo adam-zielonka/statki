@@ -1,23 +1,193 @@
 <!doctype html>
-<html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b1c29" />
+    <meta
+      name="description"
+      content="Klasyczna bitwa morska. Wybierz rywala, przygotuj flotę i odkryj swoją zwycięską taktykę."
+    />
+    <title>Statki — bitwa na spokojnych wodach</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link href="./src/main.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="masthead">
+        <a class="brand" href="./" aria-label="Statki — strona główna">
+          <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <path
+              d="M6 25h28l-5 9H12zM12 24V14h16v10M20 14V6m0 1h8"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M5 37c4-3 6 3 10 0s6 3 10 0 6 3 10 0"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+          </svg>
+          <span>statki<span class="brand-dot">.</span></span>
+        </a>
+        <span class="masthead-note">Mała flota. Wielka taktyka.</span>
+        <span class="edition">BITWA MORSKA / 01</span>
+      </header>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Statki</title>
-  <link href="./src/main.styl" rel="stylesheet">
-</head>
+      <main>
+        <section class="intro" aria-labelledby="title">
+          <div>
+            <p class="eyebrow">WITAJ NA POKŁADZIE</p>
+            <h1 id="title">Spokojne morze.<br /><span>Celne decyzje.</span></h1>
+            <p class="intro-copy">
+              Dwie floty, sto pól i jeden cel. Znajdź wszystkie statki rywala,
+              zanim on odnajdzie Twoje.
+            </p>
+          </div>
+          <div class="radar" aria-hidden="true">
+            <div class="radar-axis"></div>
+            <i></i><i></i><i></i
+            ><span>54° N &nbsp; 18° E<br />SEKTOR OTWARTY</span>
+          </div>
+        </section>
 
-<body>
-  <div id="app">
-    <div class='label'>
-      <span id="ai">COMPUTER</span>
-      <input type='button' id='newGame' value='New Game' />
-      <span id="pl">PLAYER</span>
+        <section class="opponents" aria-labelledby="opponents-title">
+          <div class="section-heading">
+            <h2 id="opponents-title">Z kim wypływasz?</h2>
+            <span id="opponent-hint">Wybierz styl przeciwnika</span>
+          </div>
+          <div
+            id="opponents"
+            class="opponent-grid"
+            role="group"
+            aria-label="Wybór przeciwnika"
+          ></div>
+          <p class="fair-play">
+            Uczciwa bitwa: każdy rywal zna tylko oddane strzały i rozmiary
+            niezatopionych statków.
+          </p>
+        </section>
+
+        <section class="battle" aria-label="Rozgrywka">
+          <div class="command-bar">
+            <div
+              class="command-status"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              <span class="status-dot" id="status-dot"></span>
+              <div>
+                <p class="eyebrow" id="phase-label">PRZYGOTOWANIE</p>
+                <h2 id="status-title">Twoja flota czeka</h2>
+                <p id="status-detail">Wylosuj ustawienie i rozpocznij bitwę.</p>
+              </div>
+            </div>
+            <div class="actions">
+              <button id="shuffle" class="button secondary">
+                ↻ &nbsp; Losuj flotę</button
+              ><button id="start" class="button primary">
+                Rozpocznij bitwę <span aria-hidden="true">↗</span></button
+              ><button id="pause" class="button secondary" hidden>Pauza</button
+              ><button id="new-game" class="button secondary" hidden>
+                Nowa gra
+              </button>
+            </div>
+          </div>
+
+          <div class="boards">
+            <section
+              class="sea-panel enemy-panel"
+              aria-labelledby="enemy-title"
+            >
+              <div class="sea-heading">
+                <div>
+                  <p class="eyebrow">WODY PRZECIWNIKA</p>
+                  <h2 id="enemy-title">Flota Hugona</h2>
+                </div>
+                <span class="fleet-count" id="enemy-count"></span>
+              </div>
+              <div
+                id="enemy-board"
+                class="sea-grid"
+                role="group"
+                aria-label="Plansza przeciwnika"
+              ></div>
+              <div class="sea-footer">
+                <div
+                  id="enemy-fleet"
+                  class="fleet"
+                  aria-label="Flota przeciwnika"
+                ></div>
+                <span id="enemy-shots">Twoje strzały: 0</span>
+              </div>
+            </section>
+            <section class="sea-panel own-panel" aria-labelledby="player-title">
+              <div class="sea-heading">
+                <div>
+                  <p class="eyebrow">BEZPIECZNA PRZYSTAŃ</p>
+                  <h2 id="player-title">Twoja flota</h2>
+                </div>
+                <span class="fleet-count" id="player-count"></span>
+              </div>
+              <div
+                id="player-board"
+                class="sea-grid"
+                role="group"
+                aria-label="Twoja plansza"
+              ></div>
+              <div class="sea-footer">
+                <div
+                  id="player-fleet"
+                  class="fleet"
+                  aria-label="Twoja flota"
+                ></div>
+                <span id="player-shots">Strzały rywala: 0</span>
+              </div>
+            </section>
+          </div>
+          <div class="legend" aria-label="Legenda planszy">
+            <span><i class="legend-ship"></i>Twój statek</span
+            ><span><i class="legend-miss">·</i>Pudło</span
+            ><span><i class="legend-hit">×</i>Trafienie</span
+            ><span><i class="legend-sunk">×</i>Zatopiony</span>
+          </div>
+        </section>
+
+        <div class="below-deck">
+          <section class="rules" aria-labelledby="rules-title">
+            <p class="eyebrow">KRÓTKA ODPRAWA</p>
+            <h2 id="rules-title">Wiesz, co robić, kapitanie.</h2>
+            <ol>
+              <li>
+                <strong>Przygotuj flotę.</strong> Masz 10 statków i 20 masztów.
+                Losuj ustawienie do woli przed startem.
+              </li>
+              <li>
+                <strong>Wybierz pole rywala.</strong> Trafienie daje kolejny
+                strzał. Pudło przekazuje turę przeciwnikowi.
+              </li>
+              <li>
+                <strong>Zatop całą flotę.</strong> Statki są proste i nie
+                stykają się. Wodę wokół zatopionego oznaczymy za Ciebie.
+              </li>
+            </ol>
+          </section>
+          <section class="log-panel" aria-labelledby="log-title">
+            <div class="section-heading">
+              <h2 id="log-title">Dziennik pokładowy</h2>
+              <span>OSTATNIE STRZAŁY</span>
+            </div>
+            <ol id="history" class="history"></ol>
+          </section>
+        </div>
+      </main>
+      <footer>
+        <span>Dobry plan. Odrobina szczęścia.</span
+        ><span>STATKI <span aria-hidden="true">✦</span> GRAJ PO SWOJEMU</span>
+      </footer>
     </div>
-    <div class="boards" id="boards"></div>
-  </div>
-  <script src="./src/main.js" type="module"></script>
-</body>
-
+    <script src="./src/main.js" type="module"></script>
+  </body>
 </html>

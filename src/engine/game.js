@@ -1,59 +1,108 @@
-import { AI } from "./ai";
-import { Board } from "./board";
+import { chooseShot } from "./ai.js";
+import { Board, coordinate } from "./board.js";
 
 export class Game {
-  constructor() {
-    this.activePlayer = true;
-    this.gameOver = true;
-    this.playerRed = new Board({ color: "red", opponent: true, ships: [
-      ["B2","B3","B4","C2","D2","E2","E3","E4","F4","G4","H4","I4","I3","I2"],
-      ["B6","C6","D6","E6","F6","G6","H6","I6","E7","B8","C8","D8","E8","F8","G8","H8","I8"],
-      ["B10","C10","D10","E10","F10","G10","H10","I10"]
-    ]});
-    this.playerGreen = new Board({ color: "green", opponent: false, ships: [
-      ["B1","C1","D1","E1","F1","G1","H1","I1"],
-      ["B3","C3","D3","E3","F3","G3","H3","I3","B4","B5","C5","D5","E5","E4"],
-      ["B7","B8","B9","C7","D7","E7","E8","E9","F9","G9","H9","I9","I8","I7"]
-    ]});
-    this.ai = new AI(this.playerRed, this.fire);
-    this.register = [];
+  constructor({
+    delay = 650,
+    schedule = setTimeout,
+    cancel = clearTimeout,
+  } = {}) {
+    this.delay = delay;
+    this.schedule = schedule;
+    this.cancel = cancel;
+    this.listeners = new Set();
+    this.generation = 0;
+    this.timer = null;
+    this.strategy = "hunter";
+    this.newGame();
   }
 
-  update = () => {
-    this.register.forEach(u => u());
-  };
+  emit() {
+    this.listeners.forEach((listener) => listener());
+  }
 
-  changePlayer = () => {
-    this.update();
-    this.activePlayer = !this.activePlayer;
-    if (!this.activePlayer) this.ai.play();
-    this.update();
-  };
+  clearPending() {
+    this.generation++;
+    if (this.timer !== null) this.cancel(this.timer);
+    this.timer = null;
+  }
 
-  fire = (box) => {
-    const [result, won] = box.shoot();
-    this.update();
-    if (won) {
-      this.gameOver = true;
-      this.update();
-      return false;
-    } else {
-      if (!result) {this.changePlayer(); return false;}
-      else return true;
-    }
-  };
+  newGame() {
+    this.clearPending();
+    this.player = new Board();
+    this.enemy = new Board();
+    this.phase = "setup";
+    this.turn = "player";
+    this.paused = false;
+    this.winner = null;
+    this.history = [];
+    this.shots = { player: 0, enemy: 0 };
+    this.emit();
+  }
 
-  newGame = () => {
-    // eslint-disable-next-line no-console
-    console.clear();
-    this.activePlayer = true;
-    this.gameOver = false;
-    this.playerRed.reset();
-    this.playerGreen.reset();
-    this.playerGreen.opponent = false;
-    this.ai.reset();
-    this.update();
-  };
+  shuffleFleet() {
+    if (this.phase !== "setup") return;
+    this.player = new Board();
+    this.emit();
+  }
+
+  selectOpponent(strategy) {
+    if (this.phase !== "setup") return;
+    this.strategy = strategy;
+    this.emit();
+  }
+
+  start() {
+    if (this.phase !== "setup") return;
+    this.phase = "playing";
+    this.emit();
+  }
+
+  togglePause() {
+    if (this.phase !== "playing") return;
+    this.paused = !this.paused;
+    this.clearPending();
+    this.emit();
+    this.queueEnemy();
+  }
+
+  fire(row, col, actor = "player") {
+    if (this.phase !== "playing" || this.paused || this.turn !== actor)
+      return null;
+    const board = actor === "player" ? this.enemy : this.player;
+    const result = board.shoot(row, col);
+    if (!result) return null;
+    this.shots[actor]++;
+    this.history.unshift({
+      ...result,
+      actor,
+      coordinate: coordinate(row, col),
+    });
+    this.history = this.history.slice(0, 8);
+    if (result.won) {
+      this.phase = "over";
+      this.winner = actor;
+      this.clearPending();
+    } else if (!result.hit) this.turn = actor === "player" ? "enemy" : "player";
+    this.emit();
+    this.queueEnemy();
+    return result;
+  }
+
+  queueEnemy() {
+    if (
+      this.phase !== "playing" ||
+      this.paused ||
+      this.turn !== "enemy" ||
+      this.timer !== null
+    )
+      return;
+    const generation = this.generation;
+    this.timer = this.schedule(() => {
+      if (generation !== this.generation) return;
+      this.timer = null;
+      const target = chooseShot(this.player.knowledge(), this.strategy);
+      if (target) this.fire(...target, "enemy");
+    }, this.delay);
+  }
 }
-
-export const game = new Game();
