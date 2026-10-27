@@ -9,6 +9,7 @@ export default defineConfig({
   use: {
     baseURL: publicURL || "http://127.0.0.1:4177",
     headless: true,
+    locale: "pl-PL",
     trace: "retain-on-failure",
   },
   webServer: publicURL ? undefined : {

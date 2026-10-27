@@ -1,3 +1,5 @@
+import { t, language, setLanguage, subscribe } from "./i18n.js";
+import { staticText } from "./static-translations.js";
 import { createBoard } from "./components/board.js";
 import { Game } from "./engine/game.js";
 import { OPPONENTS } from "./engine/ai.js";
@@ -22,15 +24,6 @@ for (const opponent of OPPONENTS) {
   button.className = "opponent";
   button.dataset.id = opponent.id;
   button.setAttribute("aria-pressed", "false");
-  const icon = opponent.id === "hunter"
-    ? `<svg viewBox="0 0 24 24" width="22" height="22" fill="none"
-        stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="6"/>
-        <path d="M12 2v6m0 8v6M2 12h6m8 0h6"/></svg>`
-    : opponent.icon;
-  button.innerHTML = `<span class="opponent-top"><span class="avatar" aria-hidden="true">${icon}</span>
-    <span class="opponent-level">${opponent.level}</span><span class="selection" aria-hidden="true">✓</span></span>
-    <span class="opponent-name">${opponent.name} <span>${opponent.role}</span></span>
-    <span class="opponent-description">${opponent.description}</span>`;
   button.addEventListener("click", () => game.selectOpponent(opponent.id));
   $("opponents").append(button);
 }
@@ -41,7 +34,11 @@ function fleet(id, board) {
     const index = counts.indexOf(length),
       alive = index !== -1;
     if (alive) counts.splice(index, 1);
-    const label = `${length} ${length === 1 ? "maszt" : "maszty"}: ${alive ? "pływa" : "zatopiony"}`;
+    const label = t("{length} {size}: {state}", {
+      length,
+      size: length === 1 ? t("maszt") : t("maszty"),
+      state: t(alive ? t("pływa") : t("zatopiony")),
+    });
     return `<span class="mini-ship ${alive ? "" : "lost"}" aria-label="${label}">
       ${"<i></i>".repeat(length)}</span>`;
   }).join("");
@@ -56,40 +53,44 @@ function update() {
   const latest = game.history[0];
   let title, detail, phase;
   if (setup) {
-    phase = "PRZYGOTOWANIE";
-    title = "Twoja flota czeka";
-    detail =
-      "Wylosuj ustawienie i rozpocznij bitwę. Pierwszy strzał należy do Ciebie.";
+    phase = t("PRZYGOTOWANIE");
+    title = t("Twoja flota czeka");
+    detail = t(
+      "Wylosuj ustawienie i rozpocznij bitwę. Pierwszy strzał należy do Ciebie.",
+    );
   } else if (over) {
-    phase = "KONIEC BITWY";
+    phase = t("KONIEC BITWY");
     title =
       game.winner === "player"
-        ? "Zwycięstwo! Morze jest Twoje."
-        : `${opponent.name} wygrywa tę bitwę`;
+        ? t("Zwycięstwo! Morze jest Twoje.")
+        : t("{name} wygrywa tę bitwę", { name: opponent.name });
     const accuracy = Math.round(
       (game.enemy.hits / (game.shots.player || 1)) * 100,
     );
-    detail = `Twoje strzały: ${game.shots.player} · Celność: ${accuracy}% · Rewanż? Rozpocznij nową grę.`;
+    detail = t(
+      "Twoje strzały: {shots} · Celność: {accuracy}% · Rewanż? Rozpocznij nową grę.",
+      { shots: game.shots.player, accuracy },
+    );
   } else if (game.paused) {
-    phase = "CHWILA W PRZYSTANI";
-    title = "Bitwa wstrzymana";
-    detail = "Floty poczekają. Wznów grę, kiedy będziesz gotów.";
+    phase = t("CHWILA W PRZYSTANI");
+    title = t("Bitwa wstrzymana");
+    detail = t("Floty poczekają. Wznów grę, kiedy będziesz gotów.");
   } else {
-    phase = yourTurn ? "TWÓJ RUCH" : "RUCH PRZECIWNIKA";
+    phase = yourTurn ? t("TWÓJ RUCH") : t("RUCH PRZECIWNIKA");
     title = yourTurn
-      ? "Obierz kurs. Wybierz pole."
-      : `${opponent.name} wybiera cel…`;
+      ? t("Obierz kurs. Wybierz pole.")
+      : t("{name} wybiera cel…", { name: opponent.name });
     detail = latest
-      ? `${latest.actor === "player" ? "Twój strzał" : opponent.name} · ${latest.coordinate} · ${
+      ? `${latest.actor === "player" ? t("Twój strzał") : opponent.name} · ${latest.coordinate} · ${
         latest.sunk
-          ? "Trafiony, zatopiony!"
+          ? t("Trafiony, zatopiony!")
           : latest.hit
             ? latest.actor === "player"
-              ? "Trafiony! Strzelaj dalej."
-              : "Trafiony! Rywal strzela dalej."
-            : "Pudło. Zmiana tury."
+              ? t("Trafiony! Strzelaj dalej.")
+              : t("Trafiony! Rywal strzela dalej.")
+            : t("Pudło. Zmiana tury.")
       }`
-      : "Kliknij pole na wodach przeciwnika. Powodzenia, kapitanie!";
+      : t("Kliknij pole na wodach przeciwnika. Powodzenia, kapitanie!");
   }
   $("phase-label").textContent = phase;
   $("status-title").textContent = title;
@@ -99,26 +100,47 @@ function update() {
   $("start").hidden = !setup;
   $("shuffle").hidden = !setup;
   $("pause").hidden = setup || over;
-  $("pause").textContent = game.paused ? "Wznów bitwę" : "Pauza";
+  $("pause").textContent = game.paused ? t("Wznów bitwę") : t("Pauza");
   $("pause").setAttribute("aria-pressed", String(game.paused));
   $("new-game").hidden = setup;
-  $("new-game").textContent = over ? "Zagraj ponownie ↗" : "Nowa gra";
+  $("new-game").textContent = over ? t("Zagraj ponownie ↗") : t("Nowa gra");
   $("opponent-hint").textContent = setup
-    ? "Wybierz styl przeciwnika"
-    : "Zmiana rywala przy nowej grze";
+    ? t("Wybierz styl przeciwnika")
+    : t("Zmiana rywala przy nowej grze");
   for (const button of $("opponents").children) {
+    const opponent = OPPONENTS.find((item) => item.id === button.dataset.id);
+    const icon =
+      opponent.id === "hunter"
+        ? `<svg viewBox="0 0 24 24" width="22" height="22" fill="none"
+        stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="6"/>
+        <path d="M12 2v6m0 8v6M2 12h6m8 0h6"/></svg>`
+        : opponent.icon;
+    button.innerHTML = `<span class="opponent-top"><span class="avatar" aria-hidden="true">${icon}</span>
+    <span class="opponent-level">${t(opponent.level)}</span><span class="selection" aria-hidden="true">✓</span></span>
+    <span class="opponent-name">${opponent.name} <span>${t(opponent.role)}</span></span>
+    <span class="opponent-description">${t(opponent.description)}</span>`;
+
     button.setAttribute(
       "aria-pressed",
       String(button.dataset.id === game.strategy),
     );
     button.disabled = !setup;
   }
-  $("enemy-title").textContent = `Flota ${possessive[game.strategy]}`;
-  $("enemy-count").textContent = `${game.enemy.remaining.length} / 10 statków`;
-  $("player-count").textContent =
-    `${game.player.remaining.length} / 10 statków`;
-  $("enemy-shots").textContent = `Twoje strzały: ${game.shots.player}`;
-  $("player-shots").textContent = `Strzały rywala: ${game.shots.enemy}`;
+  $("enemy-title").textContent = t("Flota {name}", {
+    name: language === "pl" ? possessive[game.strategy] : opponent.name,
+  });
+  $("enemy-count").textContent = t("{count} / 10 statków", {
+    count: game.enemy.remaining.length,
+  });
+  $("player-count").textContent = t("{count} / 10 statków", {
+    count: game.player.remaining.length,
+  });
+  $("enemy-shots").textContent = t("Twoje strzały: {count}", {
+    count: game.shots.player,
+  });
+  $("player-shots").textContent = t("Strzały rywala: {count}", {
+    count: game.shots.enemy,
+  });
   document
     .querySelector(".enemy-panel")
     .classList.toggle("ready", !setup && !over && yourTurn && !game.paused);
@@ -138,11 +160,13 @@ function update() {
       .map(
         (item) => `<li>
     <span class="log-mark ${item.hit ? "hit" : ""}" aria-hidden="true">${item.hit ? "×" : "·"}</span>
-    <span>${item.actor === "player" ? "Ty" : opponent.name}<strong>${item.coordinate}</strong></span>
-    <span class="log-result">${item.sunk ? "Zatopiony" : item.hit ? "Trafiony" : "Pudło"}</span></li>`,
+    <span>${item.actor === "player" ? t("Ty") : opponent.name}<strong>${item.coordinate}</strong></span>
+    <span class="log-result">${item.sunk ? t("Zatopiony") : item.hit ? t("Trafiony") : t("Pudło")}</span></li>`,
       )
       .join("")
-    : "<li class=\"empty-log\">Tu zapiszemy przebieg Twojej bitwy.<br>Każdy strzał to nowa wskazówka.</li>";
+    : t(
+      "<li class=\"empty-log\">Tu zapiszemy przebieg Twojej bitwy.<br>Każdy strzał to nowa wskazówka.</li>",
+    );
 }
 
 $("start").addEventListener("click", () => {
@@ -157,3 +181,24 @@ $("new-game").addEventListener("click", () => {
 });
 game.listeners.add(update);
 update();
+
+function translatePage() {
+  for (const [selector, source] of Object.entries(staticText)) {
+    document.querySelector(selector).innerHTML = t(source);
+  }
+  for (const element of document.querySelectorAll("[aria-label]")) {
+    element.dataset.labelSource ??= element.getAttribute("aria-label");
+    if (
+      !element.classList.contains("cell") &&
+      !element.classList.contains("mini-ship")
+    )
+      element.setAttribute("aria-label", t(element.dataset.labelSource));
+  }
+  $("language").value = language;
+  update();
+}
+$("language").addEventListener("change", (event) =>
+  setLanguage(event.target.value),
+);
+subscribe(translatePage);
+translatePage();

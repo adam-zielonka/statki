@@ -1,3 +1,4 @@
+import { t } from "../i18n.js";
 import { coordinate } from "../engine/board.js";
 
 const labels = {
@@ -70,7 +71,7 @@ export function createBoard(element, onShot) {
         button.disabled = !interactive || cell.state !== "unknown";
         button.setAttribute(
           "aria-label",
-          `${coordinate(row, col)}: ${visibleShip ? "statek" : labels[cell.state]}`,
+          `${coordinate(row, col)}: ${t(visibleShip ? "statek" : labels[cell.state])}`,
         );
       }
     }

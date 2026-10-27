@@ -1,6 +1,6 @@
 # Statki
 
-Klasyczna bitwa morska dla jednego gracza, z polskim interfejsem na komputer i telefon.
+Klasyczna bitwa morska dla jednego gracza, z interfejsem PL/EN na komputer i telefon.
 Przed startem wybierz przeciwnika i wylosuj swoją flotę. Trafienie daje kolejny strzał,
 a pudło przekazuje turę. Statki nie stykają się, również po przekątnej.
 Woda wokół zatopionego statku jest oznaczana automatycznie.
@@ -22,3 +22,12 @@ Pauza i nowa gra anulują oczekujące ruchy komputera. Planszę można obsługiw
 klawiaturą: Tab, strzałki oraz Enter lub spacja.
 
 See [DEVELOPMENT.md](DEVELOPMENT.md) for local setup and validation.
+
+
+## Language / Język
+
+The browser version supports Polish and English. On the first visit it uses the
+first supported language from the browser’s preferences, falling back to English.
+The PL / EN selector saves an explicit choice in this application’s local storage.
+Switching language preserves the current game. If storage is blocked, language switching
+still works for the current visit.

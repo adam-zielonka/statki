@@ -1008,3 +1008,6 @@ footer > span:last-child span {
   }
   .cell { scroll-margin-top: 190px; }
 }
+
+.language-picker select { background: #102c3a; color: #f4f1e9; border: 1px solid #73858d; border-radius: 6px; padding: .5rem; font: inherit; max-width: 7rem; }
+.masthead { flex-wrap: wrap; gap: 1rem; }
