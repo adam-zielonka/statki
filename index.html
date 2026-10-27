@@ -32,7 +32,6 @@
           <span>statki<span class="brand-dot">.</span></span>
         </a>
         <span class="masthead-note">Mała flota. Wielka taktyka.</span>
-        <label class="language-picker"><span>PL / EN </span><select id="language" aria-label="Język / Language"><option value="pl">Polski</option><option value="en">English</option></select></label>
         <span class="edition">BITWA MORSKA / 01</span>
       </header>
 
@@ -185,8 +184,13 @@
         </div>
       </main>
       <footer>
-        <span>Dobry plan. Odrobina szczęścia.</span
-        ><span>STATKI <span aria-hidden="true">✦</span> GRAJ PO SWOJEMU</span>
+        <span>Dobry plan. Odrobina szczęścia.</span>
+        <div class="language-switch" role="group" aria-label="Language / Język">
+          <button type="button" lang="en" data-language="en" aria-pressed="false">English</button>
+          <span aria-hidden="true">/</span>
+          <button type="button" lang="pl" data-language="pl" aria-pressed="false">Polski</button>
+        </div>
+        <span>STATKI <span aria-hidden="true">✦</span> GRAJ PO SWOJEMU</span>
       </footer>
     </div>
     <script src="./src/main.js" type="module"></script>

@@ -194,11 +194,13 @@ function translatePage() {
     )
       element.setAttribute("aria-label", t(element.dataset.labelSource));
   }
-  $("language").value = language;
+  for (const button of document.querySelectorAll("[data-language]")) {
+    button.setAttribute("aria-pressed", String(button.dataset.language === language));
+  }
   update();
 }
-$("language").addEventListener("change", (event) =>
-  setLanguage(event.target.value),
-);
+for (const button of document.querySelectorAll("[data-language]")) {
+  button.addEventListener("click", () => setLanguage(button.dataset.language));
+}
 subscribe(translatePage);
 translatePage();

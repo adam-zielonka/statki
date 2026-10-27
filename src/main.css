@@ -1009,5 +1009,9 @@ footer > span:last-child span {
   .cell { scroll-margin-top: 190px; }
 }
 
-.language-picker select { background: #102c3a; color: #f4f1e9; border: 1px solid #73858d; border-radius: 6px; padding: .5rem; font: inherit; max-width: 7rem; }
-.masthead { flex-wrap: wrap; gap: 1rem; }
+.language-switch { display: inline-flex; align-items: center; gap: .4em; color: #9aaeb8; font-size: 11px; white-space: nowrap; }
+.language-switch button { padding: .25rem 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: .2em; }
+.language-switch button[aria-pressed="true"] { font-weight: 600; text-decoration: none; }
+.language-switch button:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+
+footer { flex-wrap: wrap; align-items: center; }
