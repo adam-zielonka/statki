@@ -5,7 +5,8 @@
     "build": "vite build --base=./ --sourcemap",
     "preview": "vite preview",
     "lint": "eslint src",
-    "test": "node --test"
+    "test": "node --test",
+    "test:browser": "playwright test"
   },
   "dependencies": {
     "@eslint/js": "^10.0.1",
@@ -18,5 +19,8 @@
     "node": ">=24 <27",
     "pnpm": ">=12 <13"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
 }

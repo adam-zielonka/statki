@@ -263,3 +263,27 @@ test("complete games with every opponent conserve fleets and end with no pending
     assert.equal(clock.pending.size, 0);
   }
 });
+
+test("default timers keep the browser global receiver when scheduling and cancelling", (t) => {
+  const pending = new Map();
+  t.mock.method(globalThis, "setTimeout", function (callback) {
+    assert.ok(this === globalThis, "native timer must be called on the browser global");
+    pending.set(1, callback);
+    return 1;
+  });
+  t.mock.method(globalThis, "clearTimeout", function (id) {
+    assert.ok(this === globalThis, "native timer must be called on the browser global");
+    pending.delete(id);
+  });
+  const game = new Game();
+  game.enemy = new Board([["J10"]]);
+  game.start();
+  game.fire(0, 0);
+  assert.equal(pending.size, 1);
+  game.togglePause();
+  assert.equal(pending.size, 0);
+  game.togglePause();
+  assert.equal(pending.size, 1);
+  game.newGame();
+  assert.equal(pending.size, 0);
+});

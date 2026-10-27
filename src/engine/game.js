@@ -4,8 +4,8 @@ import { Board, coordinate } from "./board.js";
 export class Game {
   constructor({
     delay = 650,
-    schedule = setTimeout,
-    cancel = clearTimeout,
+    schedule = (callback, ms) => globalThis.setTimeout(callback, ms),
+    cancel = (timer) => globalThis.clearTimeout(timer),
   } = {}) {
     this.delay = delay;
     this.schedule = schedule;

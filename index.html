@@ -1,21 +1,21 @@
 <!doctype html>
-<html lang="en">
+<html lang="pl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0b1c29" />
     <meta
       name="description"
-      content="Classic Battleship. Choose your opponent, prepare your fleet and find your winning strategy."
+      content="Klasyczna bitwa morska. Wybierz rywala, przygotuj flotę i odkryj swoją zwycięską taktykę."
     />
-    <title>Ships — calm seas, sharp decisions</title>
+    <title>Statki — bitwa na spokojnych wodach</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link href="./src/main.css" rel="stylesheet" />
   </head>
   <body>
     <div id="app">
       <header class="masthead">
-        <a class="brand" href="./" aria-label="Ships — home">
+        <a class="brand" href="./" aria-label="Statki — strona główna">
           <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
             <path
               d="M6 25h28l-5 9H12zM12 24V14h16v10M20 14V6m0 1h8"
@@ -29,47 +29,47 @@
               stroke-width="2"
             />
           </svg>
-          <span>ships<span class="brand-dot">.</span></span>
+          <span>statki<span class="brand-dot">.</span></span>
         </a>
-        <span class="masthead-note">Small fleet. Big plans.</span>
-        <span class="edition">BATTLESHIP / 01</span>
+        <span class="masthead-note">Mała flota. Wielka taktyka.</span>
+        <span class="edition">BITWA MORSKA / 01</span>
       </header>
 
       <main>
         <section class="intro" aria-labelledby="title">
           <div>
-            <p class="eyebrow">WELCOME ABOARD</p>
-            <h1 id="title">Calm seas.<br /><span>Sharp decisions.</span></h1>
+            <p class="eyebrow">WITAJ NA POKŁADZIE</p>
+            <h1 id="title">Spokojne morze.<br /><span>Celne decyzje.</span></h1>
             <p class="intro-copy">
-              Two fleets, a hundred squares, one goal. Find every enemy ship
-              before your opponent finds yours.
+              Dwie floty, sto pól i jeden cel. Znajdź wszystkie statki rywala,
+              zanim on odnajdzie Twoje.
             </p>
           </div>
           <div class="radar" aria-hidden="true">
             <div class="radar-axis"></div>
             <i></i><i></i><i></i
-            ><span>54° N &nbsp; 18° E<br />OPEN WATERS</span>
+            ><span>54° N &nbsp; 18° E<br />SEKTOR OTWARTY</span>
           </div>
         </section>
 
         <section class="opponents" aria-labelledby="opponents-title">
           <div class="section-heading">
-            <h2 id="opponents-title">Choose your rival</h2>
-            <span id="opponent-hint">Find your kind of challenge</span>
+            <h2 id="opponents-title">Z kim wypływasz?</h2>
+            <span id="opponent-hint">Wybierz styl przeciwnika</span>
           </div>
           <div
             id="opponents"
             class="opponent-grid"
             role="group"
-            aria-label="Choose an opponent"
+            aria-label="Wybór przeciwnika"
           ></div>
           <p class="fair-play">
-            Fair play: every rival knows only previous shots and the sizes
-            of the ships still afloat.
+            Uczciwa bitwa: każdy rywal zna tylko oddane strzały i rozmiary
+            niezatopionych statków.
           </p>
         </section>
 
-        <section class="battle" aria-label="Battle">
+        <section class="battle" aria-label="Rozgrywka">
           <div class="command-bar">
             <div
               class="command-status"
@@ -79,19 +79,19 @@
             >
               <span class="status-dot" id="status-dot"></span>
               <div>
-                <p class="eyebrow" id="phase-label">GETTING READY</p>
-                <h2 id="status-title">Your fleet is ready</h2>
-                <p id="status-detail">Shuffle your fleet and start the battle.</p>
+                <p class="eyebrow" id="phase-label">PRZYGOTOWANIE</p>
+                <h2 id="status-title">Twoja flota czeka</h2>
+                <p id="status-detail">Wylosuj ustawienie i rozpocznij bitwę.</p>
               </div>
             </div>
             <div class="actions">
               <button id="shuffle" class="button secondary">
-                ↻ &nbsp; Shuffle fleet</button
+                ↻ &nbsp; Losuj flotę</button
               ><button id="start" class="button primary">
-                Start battle <span aria-hidden="true">↗</span></button
-              ><button id="pause" class="button secondary" hidden>Pause</button
+                Rozpocznij bitwę <span aria-hidden="true">↗</span></button
+              ><button id="pause" class="button secondary" hidden>Pauza</button
               ><button id="new-game" class="button secondary" hidden>
-                New game
+                Nowa gra
               </button>
             </div>
           </div>
@@ -103,8 +103,8 @@
             >
               <div class="sea-heading">
                 <div>
-                  <p class="eyebrow">ENEMY WATERS</p>
-                  <h2 id="enemy-title">Hugo's fleet</h2>
+                  <p class="eyebrow">WODY PRZECIWNIKA</p>
+                  <h2 id="enemy-title">Flota Hugona</h2>
                 </div>
                 <span class="fleet-count" id="enemy-count"></span>
               </div>
@@ -112,22 +112,22 @@
                 id="enemy-board"
                 class="sea-grid"
                 role="group"
-                aria-label="Enemy grid"
+                aria-label="Plansza przeciwnika"
               ></div>
               <div class="sea-footer">
                 <div
                   id="enemy-fleet"
                   class="fleet"
-                  aria-label="Enemy fleet"
+                  aria-label="Flota przeciwnika"
                 ></div>
-                <span id="enemy-shots">Your shots: 0</span>
+                <span id="enemy-shots">Twoje strzały: 0</span>
               </div>
             </section>
             <section class="sea-panel own-panel" aria-labelledby="player-title">
               <div class="sea-heading">
                 <div>
-                  <p class="eyebrow">HOME WATERS</p>
-                  <h2 id="player-title">Your fleet</h2>
+                  <p class="eyebrow">BEZPIECZNA PRZYSTAŃ</p>
+                  <h2 id="player-title">Twoja flota</h2>
                 </div>
                 <span class="fleet-count" id="player-count"></span>
               </div>
@@ -135,57 +135,57 @@
                 id="player-board"
                 class="sea-grid"
                 role="group"
-                aria-label="Your grid"
+                aria-label="Twoja plansza"
               ></div>
               <div class="sea-footer">
                 <div
                   id="player-fleet"
                   class="fleet"
-                  aria-label="Your fleet"
+                  aria-label="Twoja flota"
                 ></div>
-                <span id="player-shots">Enemy shots: 0</span>
+                <span id="player-shots">Strzały rywala: 0</span>
               </div>
             </section>
           </div>
-          <div class="legend" aria-label="Grid legend">
-            <span><i class="legend-ship"></i>Your ship</span
-            ><span><i class="legend-miss">·</i>Miss</span
-            ><span><i class="legend-hit">×</i>Hit</span
-            ><span><i class="legend-sunk">×</i>Sunk</span>
+          <div class="legend" aria-label="Legenda planszy">
+            <span><i class="legend-ship"></i>Twój statek</span
+            ><span><i class="legend-miss">·</i>Pudło</span
+            ><span><i class="legend-hit">×</i>Trafienie</span
+            ><span><i class="legend-sunk">×</i>Zatopiony</span>
           </div>
         </section>
 
         <div class="below-deck">
           <section class="rules" aria-labelledby="rules-title">
-            <p class="eyebrow">A QUICK BRIEFING</p>
-            <h2 id="rules-title">You have the helm, captain.</h2>
+            <p class="eyebrow">KRÓTKA ODPRAWA</p>
+            <h2 id="rules-title">Wiesz, co robić, kapitanie.</h2>
             <ol>
               <li>
-                <strong>Prepare your fleet.</strong> Your 10 ships occupy 20 squares.
-                Shuffle their positions as often as you like before starting.
+                <strong>Przygotuj flotę.</strong> Masz 10 statków i 20 masztów.
+                Losuj ustawienie do woli przed startem.
               </li>
               <li>
-                <strong>Pick an enemy square.</strong> A hit gives you another
-                shot. A miss passes the turn to your opponent.
+                <strong>Wybierz pole rywala.</strong> Trafienie daje kolejny
+                strzał. Pudło przekazuje turę przeciwnikowi.
               </li>
               <li>
-                <strong>Sink the whole fleet.</strong> Ships are straight and cannot
-                touch, even diagonally. Water around a sunk ship is marked for you.
+                <strong>Zatop całą flotę.</strong> Statki są proste i nie
+                stykają się. Wodę wokół zatopionego oznaczymy za Ciebie.
               </li>
             </ol>
           </section>
           <section class="log-panel" aria-labelledby="log-title">
             <div class="section-heading">
-              <h2 id="log-title">Captain’s log</h2>
-              <span>RECENT SHOTS</span>
+              <h2 id="log-title">Dziennik pokładowy</h2>
+              <span>OSTATNIE STRZAŁY</span>
             </div>
             <ol id="history" class="history"></ol>
           </section>
         </div>
       </main>
       <footer>
-        <span>A good plan. A little luck.</span
-        ><span>SHIPS <span aria-hidden="true">✦</span> PLAY YOUR WAY</span>
+        <span>Dobry plan. Odrobina szczęścia.</span
+        ><span>STATKI <span aria-hidden="true">✦</span> GRAJ PO SWOJEMU</span>
       </footer>
     </div>
     <script src="./src/main.js" type="module"></script>
