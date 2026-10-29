@@ -72,3 +72,79 @@ test("a new game cancels a native timer before the first enemy shot", async ({ p
   await expect(page.locator("#player-shots")).toHaveText("Strzały rywala: 0");
   expect(errors).toEqual([]);
 });
+
+for (const mobile of [false, true]) {
+  test(`hit and sunk stay distinct on both boards (${mobile ? "touch" : "keyboard"})`, async ({ browser }) => {
+    test.setTimeout(120000);
+    const context = await browser.newContext({
+      viewport: mobile ? { width: 390, height: 844 } : { width: 1280, height: 1000 },
+      isMobile: mobile,
+      hasTouch: mobile,
+      locale: "pl-PL",
+    });
+    const page = await context.newPage();
+    const errors = await prepare(page);
+    await page.locator('.opponent[data-id="random"]').click();
+    await page.evaluate(() => {
+      const boards = [...document.querySelectorAll(".sea-grid")];
+      let previous = boards.map(board => [...board.querySelectorAll(".cell")].map(cell => cell.classList.contains("hit")));
+      window.readabilityTransitions = [false, false];
+      new MutationObserver(() => {
+        boards.forEach((board, index) => {
+          const cells = [...board.querySelectorAll(".cell")];
+          cells.forEach((cell, square) => {
+            if (previous[index][square] && cell.classList.contains("sunk") && cell.textContent === "■") {
+              window.readabilityTransitions[index] = true;
+            }
+          });
+          previous[index] = cells.map(cell => cell.classList.contains("hit"));
+        });
+      }).observe(document.querySelector(".boards"), { attributes: true, childList: true, subtree: true });
+    });
+    await page.locator("#start").click();
+    const snapshot = () => page.locator(".sea-grid").evaluateAll(boards => boards.map(board =>
+      [...board.querySelectorAll(".cell")].map(cell => ({
+        hit: cell.classList.contains("hit"),
+        sunk: cell.classList.contains("sunk"),
+        mark: cell.textContent,
+      })),
+    ));
+    for (let shot = 0; shot < 64; shot++) {
+      const target = page.locator("#enemy-board button:enabled").first();
+      if (mobile) await target.tap();
+      else {
+        await target.focus();
+        await page.keyboard.press(shot % 2 ? "Space" : "Enter");
+      }
+      await page.waitForFunction(() => ["TWÓJ RUCH", "KONIEC BITWY"].includes(document.getElementById("phase-label").textContent));
+      const current = await snapshot();
+      current.forEach(board => board.forEach(cell => {
+        if (cell.sunk) expect(cell.mark).toBe("■");
+        if (cell.hit) expect(cell.mark).toBe("×");
+      }));
+      await expect(page.locator("#enemy-board .ship")).toHaveCount(0);
+      await expect(page.locator("#enemy-board .unknown").filter({ hasText: /[×■·]/ })).toHaveCount(0);
+      if (shot === 14) {
+        for (const board of ["player", "enemy"]) {
+          await expect(page.locator(`#${board}-board .hit`).first()).toHaveText("×");
+          await expect(page.locator(`#${board}-board .sunk`).first()).toHaveText("■");
+          await expect(page.locator(`#${board}-board .miss`).first()).toHaveText("·");
+        }
+      }
+      if (shot >= 14 && await page.evaluate(() => window.readabilityTransitions.every(Boolean))) break;
+    }
+    expect(await page.evaluate(() => window.readabilityTransitions)).toEqual([true, true]);
+    await page.locator("#pause").click();
+    const cells = await snapshot();
+    await page.locator("footer").getByRole("button", { name: "English", exact: true }).click();
+    expect(await snapshot()).toEqual(cells);
+    await expect(page.locator(".legend-hit")).toHaveText("×");
+    await expect(page.locator(".legend-sunk")).toHaveText("■");
+    await expect(page.locator(".legend-sunk").locator("..")).toHaveText("■Sunk");
+    await page.locator("footer").getByRole("button", { name: "Polski", exact: true }).click();
+    await expect(page.locator(".legend-sunk").locator("..")).toHaveText("■Zatopiony");
+    expect(await snapshot()).toEqual(cells);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+}

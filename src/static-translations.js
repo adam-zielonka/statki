@@ -19,7 +19,7 @@ export const staticText = {
   ".legend > span:nth-child(1)": "<i class=\"legend-ship\"></i>Twój statek",
   ".legend > span:nth-child(2)": "<i class=\"legend-miss\">·</i>Pudło",
   ".legend > span:nth-child(3)": "<i class=\"legend-hit\">×</i>Trafienie",
-  ".legend > span:nth-child(4)": "<i class=\"legend-sunk\">×</i>Zatopiony",
+  ".legend > span:nth-child(4)": "<i class=\"legend-sunk\">■</i>Zatopiony",
   ".rules .eyebrow": "KRÓTKA ODPRAWA",
   "#rules-title": "Wiesz, co robić, kapitanie.",
   ".rules li:nth-child(1)":

@@ -32,7 +32,7 @@ const translations = {
     "<i class=\"legend-ship\"></i>Your ship",
   "<i class=\"legend-miss\">·</i>Pudło": "<i class=\"legend-miss\">·</i>Miss",
   "<i class=\"legend-hit\">×</i>Trafienie": "<i class=\"legend-hit\">×</i>Hit",
-  "<i class=\"legend-sunk\">×</i>Zatopiony": "<i class=\"legend-sunk\">×</i>Sunk",
+  "<i class=\"legend-sunk\">■</i>Zatopiony": "<i class=\"legend-sunk\">■</i>Sunk",
   "KRÓTKA ODPRAWA": "A QUICK BRIEFING",
   "Wiesz, co robić, kapitanie.": "You know the drill, captain.",
   "<strong>Przygotuj flotę.</strong> Masz 10 statków i 20 masztów. Losuj ustawienie do woli przed startem.":

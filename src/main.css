@@ -576,6 +576,9 @@ h2 {
   background: #373846;
   color: #d6a19a;
 }
+.legend .legend-sunk {
+  font-size: 12px;
+}
 .below-deck {
   border-top: 1px solid var(--border);
   padding: 30px 0 35px;

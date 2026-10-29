@@ -63,11 +63,13 @@ export function createBoard(element, onShot) {
         const visibleShip = reveal && cell.ship && cell.state === "unknown";
         const isLast = last?.row === row && last?.col === col;
         button.className = `cell ${cell.state}${visibleShip ? " ship" : ""}${isLast ? " last-shot" : ""}`;
-        button.textContent = ["hit", "sunk"].includes(cell.state)
-          ? "×"
-          : ["miss", "blocked"].includes(cell.state)
-            ? "·"
-            : "";
+        button.textContent = cell.state === "sunk"
+          ? "■"
+          : cell.state === "hit"
+            ? "×"
+            : ["miss", "blocked"].includes(cell.state)
+              ? "·"
+              : "";
         button.disabled = !interactive || cell.state !== "unknown";
         button.setAttribute(
           "aria-label",
