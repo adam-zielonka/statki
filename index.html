@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0b1c29" />
+    <meta name="theme-color" content="#fffef9" />
     <meta
       name="description"
       content="Klasyczna bitwa morska. Wybierz rywala, przygotuj flotę i odkryj swoją zwycięską taktykę."
@@ -15,87 +15,21 @@
   <body>
     <div id="app">
       <header class="masthead">
-        <a class="brand" href="./" aria-label="Statki — strona główna">
-          <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
-            <path
-              d="M6 25h28l-5 9H12zM12 24V14h16v10M20 14V6m0 1h8"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M5 37c4-3 6 3 10 0s6 3 10 0 6 3 10 0"
-              stroke="currentColor"
-              stroke-width="2"
-            />
-          </svg>
-          <span>statki<span class="brand-dot">.</span></span>
-        </a>
-        <span class="masthead-note">Mała flota. Wielka taktyka.</span>
-        <span class="edition">BITWA MORSKA / 01</span>
+        <button id="rules-open" type="button" class="pen-button masthead-button" aria-haspopup="dialog" aria-controls="rules-dialog">
+          <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none"><path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/></svg>
+          <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none"><path d="M5.4 3.6Q12 3 18.8 4L18.3 20.3Q12 19.9 5.1 20.5ZM8.3 8.1L15.7 7.8M8.2 11.7L15.5 12M8 15.5L13.5 15.3"/></svg>
+          <span id="rules-button-label">Zasady gry</span>
+        </button>
+        <h1 id="title">statki</h1>
+        <button id="settings-open" type="button" class="pen-button masthead-button" aria-haspopup="dialog" aria-controls="settings-dialog">
+          <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none"><path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/></svg>
+          <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none"><path d="M3.5 6L7.5 6.2M13 6L20.5 5.8M3.5 12.2L13 11.9M18.5 12L20.5 12.2M3.5 18.2L6 18M11.5 18.1L20.5 17.8M13 6C13.3 9.6 7.4 9.8 7.5 6.1C7.2 2.6 13 2.5 13 6ZM18.5 12C18.7 15.6 12.9 15.7 13 12C12.8 8.4 18.7 8.3 18.5 12ZM11.5 18C11.9 21.6 5.9 21.7 6 18C5.8 14.5 11.6 14.4 11.5 18Z"/></svg>
+          <span id="settings-button-label">Ustawienia</span>
+        </button>
       </header>
-
       <main>
-        <section class="intro" aria-labelledby="title">
-          <div>
-            <p class="eyebrow">WITAJ NA POKŁADZIE</p>
-            <h1 id="title">Spokojne morze.<br /><span>Celne decyzje.</span></h1>
-            <p class="intro-copy">
-              Dwie floty, sto pól i jeden cel. Znajdź wszystkie statki rywala,
-              zanim on odnajdzie Twoje.
-            </p>
-          </div>
-          <div class="radar" aria-hidden="true">
-            <div class="radar-axis"></div>
-            <i></i><i></i><i></i
-            ><span>54° N &nbsp; 18° E<br />SEKTOR OTWARTY</span>
-          </div>
-        </section>
-
-        <section class="opponents" aria-labelledby="opponents-title">
-          <div class="section-heading">
-            <h2 id="opponents-title">Z kim wypływasz?</h2>
-            <span id="opponent-hint">Wybierz styl przeciwnika</span>
-          </div>
-          <div
-            id="opponents"
-            class="opponent-grid"
-            role="group"
-            aria-label="Wybór przeciwnika"
-          ></div>
-          <p class="fair-play">
-            Uczciwa bitwa: każdy rywal zna tylko oddane strzały i rozmiary
-            niezatopionych statków.
-          </p>
-        </section>
-
         <section class="battle" aria-label="Rozgrywka">
-          <div class="command-bar">
-            <div
-              class="command-status"
-              role="status"
-              aria-live="polite"
-              aria-atomic="true"
-            >
-              <span class="status-dot" id="status-dot"></span>
-              <div>
-                <p class="eyebrow" id="phase-label">PRZYGOTOWANIE</p>
-                <h2 id="status-title">Twoja flota czeka</h2>
-                <p id="status-detail">Wylosuj ustawienie i rozpocznij bitwę.</p>
-              </div>
-            </div>
-            <div class="actions">
-              <button id="shuffle" class="button secondary">
-                ↻ &nbsp; Losuj flotę</button
-              ><button id="start" class="button primary">
-                Rozpocznij bitwę <span aria-hidden="true">↗</span></button
-              ><button id="pause" class="button secondary" hidden>Pauza</button
-              ><button id="new-game" class="button secondary" hidden>
-                Nowa gra
-              </button>
-            </div>
-          </div>
-
+          <p id="game-announcement" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></p>
           <div class="boards">
             <section
               class="sea-panel enemy-panel"
@@ -103,33 +37,63 @@
             >
               <div class="sea-heading">
                 <div>
-                  <p class="eyebrow">WODY PRZECIWNIKA</p>
                   <h2 id="enemy-title">Flota Hugona</h2>
                 </div>
-                <span class="fleet-count" id="enemy-count"></span>
+                <span id="enemy-win" class="winner-mark" hidden></span>
+                <button id="start" type="button" class="pen-button start-battle">
+                  <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none">
+                    <path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/>
+                  </svg>
+                  <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+                    <path d="M6.3 3.9Q13.2 7.3 20.1 11.8Q13.7 16.2 6.1 20.3Q6.7 12.4 6.3 3.9M7 4.8L18.5 11.9"/>
+                  </svg>
+                  <span id="start-label">Rozpocznij bitwę</span>
+                </button>
+                <button id="replay" type="button" class="pen-button" hidden>
+                  <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none">
+                    <path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/>
+                  </svg>
+                  <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+                    <path d="M4.2 9.1C6.3 4.3 11.8 2.5 16.3 5.1C20.6 7.5 21.4 13.6 18.1 17.3C15.1 20.7 9.7 21 6.2 17.5M4.4 3.8L3.5 9.9L9.4 9.3"/>
+                  </svg>
+                  <span id="replay-label">Zagraj ponownie</span>
+                </button>
               </div>
-              <div
-                id="enemy-board"
-                class="sea-grid"
-                role="group"
-                aria-label="Plansza przeciwnika"
-              ></div>
+              <div class="board-stage">
+                <div
+                  id="enemy-board"
+                  class="sea-grid"
+                  role="group"
+                  aria-label="Plansza przeciwnika"
+                ></div>
+                <div id="opponent-setup">
+                  <div id="opponents" class="opponent-grid" role="group" aria-label="Wybór przeciwnika"></div>
+                  <p id="selected-opponent-description"></p>
+                </div>
+              </div>
               <div class="sea-footer">
                 <div
                   id="enemy-fleet"
                   class="fleet"
                   aria-label="Flota przeciwnika"
                 ></div>
-                <span id="enemy-shots">Twoje strzały: 0</span>
               </div>
             </section>
             <section class="sea-panel own-panel" aria-labelledby="player-title">
               <div class="sea-heading">
                 <div>
-                  <p class="eyebrow">BEZPIECZNA PRZYSTAŃ</p>
                   <h2 id="player-title">Twoja flota</h2>
                 </div>
-                <span class="fleet-count" id="player-count"></span>
+                <span id="player-win" class="winner-mark" hidden></span>
+                <button id="shuffle" type="button" class="pen-button">
+                  <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none">
+                    <path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/>
+                  </svg>
+                  <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+                    <path d="M19.7 8.4C18.6 4.7 14.8 2.8 10.9 3.7C7.3 4.4 4.9 7.6 5.1 10.4M16 8.9L20.6 9.5L21 4.6M4.3 15.5C5.7 19.4 9.5 21.3 13.4 20.3C17 19.4 19.3 16.4 19 13.4M8.3 15L3.5 14.4L3 19.3"/>
+                  </svg>
+                  <span id="shuffle-label">Losuj flotę</span>
+                </button>
               </div>
               <div
                 id="player-board"
@@ -143,22 +107,25 @@
                   class="fleet"
                   aria-label="Twoja flota"
                 ></div>
-                <span id="player-shots">Strzały rywala: 0</span>
               </div>
             </section>
           </div>
           <div class="legend" aria-label="Legenda planszy">
             <span><i class="legend-ship"></i>Twój statek</span
             ><span><i class="legend-miss">·</i>Pudło</span
-            ><span><i class="legend-hit">×</i>Trafienie</span
-            ><span><i class="legend-sunk">■</i>Zatopiony</span>
+            ><span><i class="legend-hit pen-cross">×</i>Trafienie</span
+            ><span><i class="legend-sunk pen-cross">×</i>Zatopiony</span>
           </div>
         </section>
 
-        <div class="below-deck">
-          <section class="rules" aria-labelledby="rules-title">
-            <p class="eyebrow">KRÓTKA ODPRAWA</p>
-            <h2 id="rules-title">Wiesz, co robić, kapitanie.</h2>
+        <dialog id="rules-dialog" class="paper-dialog rules" aria-labelledby="rules-title">
+            <div class="dialog-heading">
+              <h2 id="rules-title">Zasady gry</h2>
+              <button type="button" class="pen-button dialog-close" data-close-dialog aria-label="Zamknij" autofocus>
+                <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none"><path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/></svg>
+                <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none"><path d="M5.5 5Q11.9 11.6 18.8 19M18.5 5.3Q12.4 12.4 5.1 18.6"/></svg>
+              </button>
+            </div>
             <ol>
               <li>
                 <strong>Przygotuj flotę.</strong> Masz 10 statków i 20 masztów.
@@ -173,25 +140,62 @@
                 stykają się. Wodę wokół zatopionego oznaczymy za Ciebie.
               </li>
             </ol>
-          </section>
-          <section class="log-panel" aria-labelledby="log-title">
-            <div class="section-heading">
-              <h2 id="log-title">Dziennik pokładowy</h2>
-              <span>OSTATNIE STRZAŁY</span>
+            <p class="fair-play">Uczciwa bitwa: każdy rywal zna tylko oddane strzały i rozmiary niezatopionych statków.</p>
+        </dialog>
+        <dialog id="settings-dialog" class="paper-dialog settings" aria-labelledby="settings-title">
+            <div class="dialog-heading">
+              <h2 id="settings-title">Ustawienia</h2>
+              <button type="button" class="pen-button dialog-close" data-close-dialog aria-label="Zamknij" autofocus>
+                <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none"><path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/></svg>
+                <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none"><path d="M5.5 5Q11.9 11.6 18.8 19M18.5 5.3Q12.4 12.4 5.1 18.6"/></svg>
+              </button>
             </div>
-            <ol id="history" class="history"></ol>
-          </section>
-        </div>
+            <div class="settings-content">
+              <div>
+                <p id="pace-label" class="settings-label">Tempo rywala</p>
+                <div class="pace-buttons settings-choices" role="group" aria-labelledby="pace-label">
+                  <button type="button" class="pen-button" data-delay="1200">
+                    <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none"><path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/></svg>
+                    <span id="pace-slow-label">Spokojne</span>
+                  </button>
+                  <button type="button" class="pen-button" data-delay="650">
+                    <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none"><path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/></svg>
+                    <span id="pace-normal-label">Zwykłe</span>
+                  </button>
+                  <button type="button" class="pen-button" data-delay="250">
+                    <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none"><path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/></svg>
+                    <span id="pace-fast-label">Szybkie</span>
+                  </button>
+                </div>
+              </div>
+              <div>
+                <p id="language-label" class="settings-label">Język</p>
+                <div class="language-switch settings-choices" role="group" aria-labelledby="language-label">
+                  <button type="button" class="pen-button" lang="en" data-language="en" aria-pressed="false">
+                    <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none"><path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/></svg>
+                    English
+                  </button>
+                  <button type="button" class="pen-button" lang="pl" data-language="pl" aria-pressed="false">
+                    <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none"><path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/></svg>
+                    Polski
+                  </button>
+                </div>
+              </div>
+              <div class="settings-links">
+                <button id="new-game" type="button" class="pen-button">
+                  <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none"><path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/></svg>
+                  <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none"><path d="M4.2 9.1C6.3 4.3 11.8 2.5 16.3 5.1C20.6 7.5 21.4 13.6 18.1 17.3C15.1 20.7 9.7 21 6.2 17.5M4.4 3.8L3.5 9.9L9.4 9.3"/></svg>
+                  <span id="new-game-label">Nowa gra</span>
+                </button>
+                <a class="source-link pen-button" href="https://github.com/adam-zielonka/statki" target="_blank" rel="noreferrer">
+                  <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none"><path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/></svg>
+                  <span>GitHub</span>
+                  <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none"><path d="M6 18Q12 12 19 5M10.5 5.6L19.5 4.8L18.8 13.5"/></svg>
+                </a>
+              </div>
+            </div>
+        </dialog>
       </main>
-      <footer>
-        <span>Dobry plan. Odrobina szczęścia.</span>
-        <div class="language-switch" role="group" aria-label="Language / Język">
-          <button type="button" lang="en" data-language="en" aria-pressed="false">English</button>
-          <span aria-hidden="true">/</span>
-          <button type="button" lang="pl" data-language="pl" aria-pressed="false">Polski</button>
-        </div>
-        <span>STATKI <span aria-hidden="true">✦</span> GRAJ PO SWOJEMU</span>
-      </footer>
     </div>
     <script src="./src/main.js" type="module"></script>
   </body>

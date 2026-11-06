@@ -206,23 +206,18 @@ test("restart invalidates an already queued enemy shot even if its callback stil
   assert.equal(clock.pending.size, 0);
 });
 
-test("pause cancels the enemy timer, blocks player shots and resumes one timer only", () => {
+test("queueing an enemy turn repeatedly schedules only one shot", () => {
   const clock = scheduler(),
     game = new Game(clock);
   game.start();
   miss(game);
-  const stale = [...clock.pending.values()][0];
-  game.togglePause();
-  stale();
-  assert.equal(clock.pending.size, 0);
-  assert.equal(game.shots.enemy, 0);
-  assert.equal(game.fire(1, 1), null);
-  game.togglePause();
+  game.queueEnemy();
   game.queueEnemy();
   assert.equal(clock.pending.size, 1);
   clock.tick();
   assert.equal(game.shots.enemy, 1);
   game.newGame();
+  assert.equal(clock.pending.size, 0);
 });
 
 test("winning ends the game and blocks every subsequent shot", () => {
@@ -280,10 +275,41 @@ test("default timers keep the browser global receiver when scheduling and cancel
   game.start();
   game.fire(0, 0);
   assert.equal(pending.size, 1);
-  game.togglePause();
-  assert.equal(pending.size, 0);
-  game.togglePause();
+  game.setDelay(250);
   assert.equal(pending.size, 1);
   game.newGame();
   assert.equal(pending.size, 0);
+});
+
+
+test("pace changes replace pending shots and respect restart and game over", () => {
+  const clock = scheduler();
+  const delays = [];
+  const game = new Game({ ...clock, schedule(callback, delay) {
+    delays.push(delay);
+    return clock.schedule(callback);
+  } });
+  game.setDelay(1200);
+  assert.equal(clock.pending.size, 0);
+  game.start();
+  miss(game);
+  const stale = [...clock.pending.values()][0];
+  game.setDelay(250);
+  stale();
+  assert.equal(game.shots.enemy, 0);
+  assert.deepEqual(delays, [1200, 250]);
+  assert.equal(clock.pending.size, 1);
+  game.setDelay(650);
+  assert.equal(delays.at(-1), 650);
+  assert.equal(clock.pending.size, 1);
+  clock.tick();
+  assert.equal(game.shots.enemy, 1);
+  game.newGame();
+  assert.equal(game.delay, 650);
+  assert.equal(clock.pending.size, 0);
+  game.enemy = new Board([["A1"]]);
+  game.start();
+  game.fire(0, 0);
+  game.setDelay(250);
+  assert.equal(clock.pending.size, 0);
 });

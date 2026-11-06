@@ -32,6 +32,13 @@ export function createBoard(element, onShot) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "cell";
+      button.dataset.row = row;
+      button.dataset.col = col;
+      button.dataset.markVariant = (row * 7 + col) % 3;
+      const mark = document.createElement("span");
+      mark.className = "cell-mark";
+      mark.setAttribute("aria-hidden", "true");
+      button.append(mark);
       button.addEventListener("click", () => onShot?.(row, col));
       button.addEventListener("keydown", (event) => {
         const step = {
@@ -63,13 +70,24 @@ export function createBoard(element, onShot) {
         const visibleShip = reveal && cell.ship && cell.state === "unknown";
         const isLast = last?.row === row && last?.col === col;
         button.className = `cell ${cell.state}${visibleShip ? " ship" : ""}${isLast ? " last-shot" : ""}`;
-        button.textContent = cell.state === "sunk"
-          ? "■"
-          : cell.state === "hit"
-            ? "×"
-            : ["miss", "blocked"].includes(cell.state)
-              ? "·"
-              : "";
+        // Join the visible ship outline, as if drawn with a pen on graph paper.
+        // An unfinished enemy ship must not reveal its shape through the DOM.
+        const outlined = (r, c) => {
+          const neighbor = board.cells[r]?.[c];
+          return neighbor?.ship && (reveal || neighbor.state === "sunk");
+        };
+        if (outlined(row, col)) {
+          button.classList.add("ship-outline");
+          for (const [edge, dr, dc] of [
+            ["top", -1, 0], ["right", 0, 1], ["bottom", 1, 0], ["left", 0, -1],
+          ]) {
+            if (!outlined(row + dr, col + dc)) button.classList.add(`edge-${edge}`);
+          }
+        }
+        const marked = cell.state === "hit" || cell.state === "sunk";
+        const mark = button.firstElementChild;
+        mark.className = `cell-mark${marked ? " pen-cross" : ""}`;
+        mark.textContent = marked ? "×" : ["miss", "blocked"].includes(cell.state) ? "·" : "";
         button.disabled = !interactive || cell.state !== "unknown";
         button.setAttribute(
           "aria-label",

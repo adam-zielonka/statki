@@ -33,7 +33,6 @@ export class Game {
     this.enemy = new Board();
     this.phase = "setup";
     this.turn = "player";
-    this.paused = false;
     this.winner = null;
     this.history = [];
     this.shots = { player: 0, enemy: 0 };
@@ -58,16 +57,16 @@ export class Game {
     this.emit();
   }
 
-  togglePause() {
-    if (this.phase !== "playing") return;
-    this.paused = !this.paused;
+  setDelay(delay) {
+    if (!Number.isFinite(delay) || delay < 100 || delay > 2000) return;
+    this.delay = delay;
     this.clearPending();
     this.emit();
     this.queueEnemy();
   }
 
   fire(row, col, actor = "player") {
-    if (this.phase !== "playing" || this.paused || this.turn !== actor)
+    if (this.phase !== "playing" || this.turn !== actor)
       return null;
     const board = actor === "player" ? this.enemy : this.player;
     const result = board.shoot(row, col);
@@ -92,7 +91,6 @@ export class Game {
   queueEnemy() {
     if (
       this.phase !== "playing" ||
-      this.paused ||
       this.turn !== "enemy" ||
       this.timer !== null
     )

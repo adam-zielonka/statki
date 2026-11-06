@@ -15,7 +15,7 @@ Pull requests run validation without deploying. Pages deployment is restricted t
 the default branch. Dependabot checks compatible updates weekly; major updates
 are reviewed separately.
 
-Engine tests cover complete matches, legal targeting, fleet integrity, hidden information, pause and restart cancellation.
+Engine tests cover complete matches, legal targeting, fleet integrity, hidden information, pace changes and restart cancellation.
 
 Browser regression checks use native Chromium timers against the production build:
 
