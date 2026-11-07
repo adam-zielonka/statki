@@ -18,15 +18,18 @@ async function prepare(page) {
 
 async function passTurn(page, restart = false) {
   // Restart within the same task to cancel the pending native timer before it fires.
-  await page.evaluate(shouldRestart => {
+  return page.evaluate(shouldRestart => {
     for (let shot = 0; shot < 21; shot++) {
-      if (document.getElementById("enemy-title").classList.contains("active-turn")) {
+      if (document.getElementById("player-status").dataset.state === "under-attack") {
+        const labels = [...document.querySelectorAll(".board-status")].map(label => ({
+          text: label.textContent, hidden: label.hidden,
+        }));
         if (shouldRestart) {
           document.getElementById("settings-open").click();
           document.getElementById("new-game").click();
           document.getElementById("start").click();
         }
-        return;
+        return labels;
       }
       document.querySelector("#enemy-board button:enabled").click();
     }
@@ -37,14 +40,19 @@ async function passTurn(page, restart = false) {
 for (const id of ["random", "hunter", "parity", "sonar"]) {
   test(`${id} fires with native browser timers`, async ({ page }) => {
     const errors = await prepare(page);
+    await expect(page.locator(".board-status:visible")).toHaveCount(0);
     await page.locator(`.opponent[data-id="${id}"]`).click();
     await page.locator("#start").click();
-    await passTurn(page);
+    await expect(page.locator("#enemy-status")).toHaveText("Atakujesz");
+    await expect(page.locator("#player-status")).toBeHidden();
+    const labels = await passTurn(page);
+    expect(labels).toEqual([{ text: "", hidden: true }, { text: "Jesteś atakowany", hidden: false }]);
     await expect(page.locator("#player-board .last-shot")).toHaveCount(1);
     // Exercise native clearTimeout while a bot may have another shot pending.
     await page.locator("#settings-open").click();
     await page.locator("#new-game").click();
     await expect(page.locator("#opponent-setup")).toBeVisible();
+    await expect(page.locator(".board-status:visible")).toHaveCount(0);
     await expect(page.locator("#player-board .miss, #player-board .hit, #player-board .sunk")).toHaveCount(0);
     expect(errors).toEqual([]);
   });
@@ -57,7 +65,7 @@ test("opening rules and settings keeps the opponent moving", async ({ page }) =>
   await page.locator("#rules-open").click();
   await expect(page.locator("#rules-dialog")).toBeVisible();
   await expect(page.locator("#player-board .last-shot")).toHaveCount(1);
-  await expect(page.locator("#player-title")).toHaveClass(/active-turn/, { timeout: 15000 });
+  await expect(page.locator("#enemy-status")).toHaveAttribute("data-state", "attacking", { timeout: 15000 });
   await page.keyboard.press("Escape");
   await page.locator("#settings-open").click();
   await expect(page.locator("#settings-dialog")).toBeVisible();
@@ -70,8 +78,33 @@ test("a new game cancels a native timer before the first enemy shot", async ({ p
   await page.locator("#start").click();
   await passTurn(page, true);
   await page.waitForTimeout(900);
-  await expect(page.locator("#player-title")).toHaveClass(/active-turn/);
+  await expect(page.locator("#enemy-status")).toHaveText("Atakujesz");
   await expect(page.locator("#player-board .miss, #player-board .hit, #player-board .sunk")).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test("turn labels give way to the winner and reset on a rematch", async ({ page }) => {
+  test.setTimeout(90000);
+  const errors = await prepare(page);
+  await page.locator('.opponent[data-id="sonar"]').click();
+  await page.locator("#settings-open").click();
+  await page.locator('[data-delay="250"]').click();
+  await page.locator(".settings .dialog-close").click();
+  await page.locator("#start").click();
+  for (let shot = 0; shot < 100; shot++) {
+    await page.waitForFunction(() => document.querySelector('#enemy-board button:enabled, .winner-mark:not([hidden])'));
+    if (await page.locator(".winner-mark:visible").count()) break;
+    await expect(page.locator("#enemy-status")).toHaveText("Atakujesz");
+    await page.locator("#enemy-board button:enabled").first().click();
+  }
+  await expect(page.locator(".winner-mark:visible")).toHaveCount(1);
+  await expect(page.locator(".winner-mark:visible")).toHaveText("Wygrana!!!");
+  await expect(page.locator(".turn-mark:visible")).toHaveCount(0);
+  await page.locator("#replay").click();
+  await expect(page.locator("#opponent-setup")).toBeVisible();
+  await expect(page.locator(".board-status:visible")).toHaveCount(0);
+  await page.locator("#start").click();
+  await expect(page.locator("#enemy-status")).toHaveText("Atakujesz");
   expect(errors).toEqual([]);
 });
 
@@ -118,7 +151,7 @@ for (const mobile of [false, true]) {
         await target.focus();
         await page.keyboard.press(shot % 2 ? "Space" : "Enter");
       }
-      await page.waitForFunction(() => document.querySelector("#player-title.active-turn, .winner-mark:not([hidden])"));
+      await page.waitForFunction(() => document.querySelector("#enemy-status[data-state=attacking], .winner-mark:not([hidden])"));
       const current = await snapshot();
       current.forEach(board => board.forEach(cell => {
         if (cell.sunk) expect(cell.mark).toBe("×");

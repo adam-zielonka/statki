@@ -1,6 +1,8 @@
 /* eslint max-len: ["warn", { "code": 120, "ignoreStrings": true }] */
 const translations = {
   "Wygrana!!!": "Victory!!!",
+  "Atakujesz": "You’re attacking",
+  "Jesteś atakowany": "You’re under attack",
   "statki": "battleship",
   "Zamknij": "Close",
   "Ustawienia": "Settings",

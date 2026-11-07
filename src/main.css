@@ -160,6 +160,25 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
 .sea-heading { min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
 
 .sea-heading h2 { position: relative; font-size: 31px; color: var(--pen); }
+.board-status { position: relative; flex: none; }
+.turn-mark {
+  flex-shrink: 1;
+  max-width: 55%;
+  padding: 4px 8px;
+  color: var(--green);
+  font: 700 26px/1 var(--hand);
+  text-align: center;
+  transform: rotate(-3deg);
+}
+.turn-mark[data-state="under-attack"] { color: var(--red); }
+.turn-mark::after {
+  content: "";
+  position: absolute;
+  inset: -3px -4px;
+  background: currentColor;
+  mask: url("/pen-ellipse.svg") center / 100% 100% no-repeat;
+  pointer-events: none;
+}
 .winner-mark {
   position: relative;
   flex: none;
@@ -178,15 +197,6 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
   border-bottom: 2px solid currentColor;
   border-radius: 50%;
 }
-.sea-heading h2.active-turn::after {
-  content: "";
-  position: absolute;
-  inset: -6px -7px;
-  background: var(--pen);
-  mask: url("/pen-ellipse.svg") center / 100% 100% no-repeat;
-  transform: rotate(-3deg);
-  pointer-events: none;
-}
 
 
 .board-stage { position: relative; }
@@ -203,6 +213,7 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
 }
 #selected-opponent-description { display: none; }
 @container (max-width: 420px) {
+  .sea-heading { min-height: 60px; }
   #opponent-setup { padding: 10px; gap: 8px; }
   .opponent-description {
     position: absolute;

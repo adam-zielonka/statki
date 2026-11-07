@@ -89,7 +89,7 @@ for (const width of [320, 390, 844, 1280]) {
     await fits();
     await page.locator("#rules-open").click();
     await expect(page.getByRole("dialog", { name: "How to play", exact: true })).toBeVisible();
-    await expect(page.locator("#player-title")).toHaveClass(/active-turn/);
+    await expect(page.locator("#enemy-status")).toHaveText("You’re attacking");
     await page.locator(".rules .dialog-close").click();
     await expect(page.locator("#rules-dialog")).toBeHidden();
     await expect(page.locator("#rules-open")).toBeFocused();

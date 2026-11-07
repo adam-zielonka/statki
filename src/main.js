@@ -50,12 +50,16 @@ function update() {
     over = game.phase === "over";
   const yourTurn = game.turn === "player";
   const activeTurn = game.phase === "playing";
-  $("player-title").classList.toggle("active-turn", activeTurn && yourTurn);
-  $("enemy-title").classList.toggle("active-turn", activeTurn && !yourTurn);
+  const turnState = yourTurn ? "attacking" : "under-attack";
+  const turnLabel = t(yourTurn ? "Atakujesz" : "Jesteś atakowany");
   for (const actor of ["player", "enemy"]) {
-    const winnerMark = $(`${actor}-win`);
-    winnerMark.hidden = !over || game.winner !== actor;
-    winnerMark.textContent = t("Wygrana!!!");
+    const status = $(`${actor}-status`);
+    const winner = over && game.winner === actor;
+    const target = activeTurn && actor === (yourTurn ? "enemy" : "player");
+    status.hidden = !winner && !target;
+    status.dataset.state = winner ? "winner" : target ? turnState : "idle";
+    status.className = `board-status${winner ? " winner-mark" : target ? " turn-mark" : ""}`;
+    status.textContent = winner ? t("Wygrana!!!") : target ? turnLabel : "";
   }
   const replay = $("replay");
   replay.hidden = !over;
@@ -108,9 +112,6 @@ function update() {
   $("enemy-title").textContent = t("Flota {name}", {
     name: language === "pl" ? possessive[game.strategy] : opponent.name,
   });
-  document
-    .querySelector(".enemy-panel")
-    .classList.toggle("ready", activeTurn && yourTurn);
   updateEnemy(game.enemy, {
     interactive: activeTurn && yourTurn,
     reveal: over,

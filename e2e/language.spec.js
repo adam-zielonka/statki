@@ -9,12 +9,12 @@ test('browser language, manual choice and persistence preserve the battle', asyn
   await expect(page.locator('#start')).toContainText('Start battle');
   await page.locator('#start').click();
   await page.locator('#enemy-board button:enabled').first().click();
-  await expect(page.locator('#player-title')).toHaveClass(/active-turn/, { timeout: 15000 });
+  await expect(page.locator('#enemy-status')).toHaveText('You’re attacking', { timeout: 15000 });
   await page.locator('#settings-open').click();
   const ships = await page.locator('#player-board').innerHTML();
   const shots = await page.locator('.sea-grid .miss, .sea-grid .hit, .sea-grid .sunk').count();
   await page.locator('.settings').getByRole('button', { name: 'Polski', exact: true }).click();
-  await expect(page.locator('#player-title')).toHaveClass(/active-turn/);
+  await expect(page.locator('#enemy-status')).toHaveText('Atakujesz');
   expect(await page.locator('.sea-grid .miss, .sea-grid .hit, .sea-grid .sunk').count()).toBe(shots);
   // Classes and positions stay unchanged; accessible labels follow the new language.
   const cells = await page.locator('#player-board .cell').evaluateAll(nodes => nodes.map(node => node.className));

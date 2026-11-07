@@ -26,7 +26,9 @@ pozostałych statków. Ukryte położenia floty nie są przekazywane algorytmom.
 Plansza rywala jest widoczna od początku, a cztery kafelki wyboru leżą na jej kratce
 i znikają po starcie. Na wąskiej planszy opis dotyczy wybranego przeciwnika.
 Losowanie znajduje się przy nagłówku Twojej floty, a rozpoczęcie bitwy przy flocie rywala.
-Odręczna elipsa wskazuje gracza wykonującego ruch. Po zakończeniu gry zwycięzca
+W nagłówku planszy rywala pojawia się zielone „Atakujesz”, gdy możesz strzelać,
+a podczas ruchu przeciwnika przy Twojej flocie czerwone „Jesteś atakowany”.
+Oba komunikaty mają odręczną obwódkę. Po zakończeniu gry zwycięzca
 otrzymuje zielony napis, a przy przegranej flocie pojawia się przycisk rewanżu.
 Przyciski przy krawędziach nagłówka otwierają okna zasad i ustawień.
 W ustawieniach wybierzesz tempo
