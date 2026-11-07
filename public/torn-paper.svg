@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" preserveAspectRatio="none">
+  <filter id="tear" x="0" y="0" width="600" height="700" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency=".065" numOctaves="3" seed="17" result="fibres"/>
+    <feDisplacementMap in="SourceGraphic" in2="fibres" scale="12" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <path fill="white" filter="url(#tear)" d="M5 5H595V695H5Z"/>
+</svg>

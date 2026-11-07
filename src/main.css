@@ -137,7 +137,12 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
 .opponent-description { color: #46596b; font-size: 12px; line-height: 1.6; }
 .fair-play { color: var(--muted); font-size: 12px; margin: 18px 0 0; line-height: 1.7; }
 
-.boards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.boards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  filter: drop-shadow(1px 3px 2px #29456224);
+}
 .sea-panel {
   --axis-width: 24px;
   --axis-height: 28px;
@@ -146,13 +151,12 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
   container-type: inline-size;
   overflow: hidden;
   background: var(--paper);
-  border: 1px solid #c1ccd0;
-  border-radius: 5px 9px 3px 7px;
+  border: 1px solid transparent;
+  /* Only the paper silhouette is roughened; the playing grid stays straight. */
+  mask: url("/torn-paper.svg") 0 0 / 100% 100% no-repeat;
   padding: 18px;
   min-width: 0;
-  box-shadow: 2px 3px 0 #8c9b9b12;
 }
-.sea-panel.ready { border-color: #7795b5; }
 .sea-heading { min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
 
 .sea-heading h2 { position: relative; font-size: 31px; color: var(--pen); }
