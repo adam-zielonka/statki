@@ -15,6 +15,36 @@ for (const width of [320, 390, 844, 1280]) {
           expect(box.x + box.width).toBeLessThanOrEqual(width);
           const cell = await page.locator(`${board} .cell`).first().boundingBox();
           expect(cell.width).toBeGreaterThanOrEqual(24);
+          const geometry = await page.locator(board).evaluate(grid => {
+            const rect = grid.getBoundingClientRect();
+            const style = getComputedStyle(grid);
+            const axisWidth = parseFloat(style.getPropertyValue("--axis-width"));
+            const axisHeight = parseFloat(style.getPropertyValue("--axis-height"));
+            const square = (rect.width - axisWidth) / 10;
+            const paper = getComputedStyle(grid, "::before");
+            const frame = getComputedStyle(grid, "::after");
+            // Compare the painted 1px grid-line centres with the frame and cells.
+            const paperX = parseFloat(paper.left) + parseFloat(paper.backgroundPositionX) + 0.5;
+            const paperY = parseFloat(paper.top) + parseFloat(paper.backgroundPositionY) + 0.5;
+            const errors = [
+              Math.abs(paperX - axisWidth),
+              Math.abs(paperY - axisHeight),
+              Math.abs(parseFloat(frame.left) - paperX),
+              Math.abs(parseFloat(frame.top) - paperY),
+              Math.abs(parseFloat(frame.width) - 10 * square),
+              Math.abs(parseFloat(frame.height) - 10 * square),
+            ];
+            return errors.concat([...grid.querySelectorAll(".cell")].map(cell => {
+              const box = cell.getBoundingClientRect();
+              return Math.max(
+                Math.abs(box.width - square),
+                Math.abs(box.height - square),
+                Math.abs(box.left - rect.left - axisWidth - Number(cell.dataset.col) * square),
+                Math.abs(box.top - rect.top - axisHeight - Number(cell.dataset.row) * square),
+              );
+            }));
+          });
+          expect(Math.max(...geometry), `${board}: square cells must align with the card's graph paper`).toBeLessThan(0.2);
         }
       }
       const mast = await page.locator("#player-fleet .mini-ship i").first().boundingBox();
