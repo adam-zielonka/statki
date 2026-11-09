@@ -92,14 +92,12 @@ function update() {
   }
   for (const button of $("opponents").children) {
     const opponent = OPPONENTS.find((item) => item.id === button.dataset.id);
-    button.innerHTML = `<svg class="opponent-frame" viewBox="0 0 200 140" preserveAspectRatio="none" aria-hidden="true">
-      <path class="opponent-outline"
-        d="M4 5C51 2 116 7 195 4C193 46 198 90 195 135C128 138 64 133 4 136C7 88 2 46 4 5Z"
-        vector-effect="non-scaling-stroke"/>
-      <path class="opponent-retrace"
-        d="M8 8C68 5 133 10 192 7M192 132C131 135 63 131 8 133"
-        vector-effect="non-scaling-stroke"/>
-    </svg><span class="selection" aria-hidden="true">✓</span>
+    button.innerHTML = `<svg class="selection" viewBox="0 0 24 28" aria-hidden="true">
+      <path d="M12 17v9" fill="none" stroke="#596b7d" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M8 5h8l-1 7 3 4.5c-3 2-9 2-12 0L9 12Z" fill="#b34451" stroke="#873943" stroke-width=".8"/>
+      <ellipse cx="12" cy="5" rx="5.5" ry="2.5" fill="#d96872" stroke="#873943" stroke-width=".8"/>
+      <path d="m9.5 8 .4 3" fill="none" stroke="#fff7" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>
     <span class="opponent-name">${opponent.name} <span>${t(opponent.role)}</span></span>
     <span class="opponent-description">${t(opponent.description)}</span>`;
 

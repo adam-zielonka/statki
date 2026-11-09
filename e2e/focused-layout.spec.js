@@ -18,19 +18,25 @@ for (const width of [320, 390, 844, 1280]) {
           const geometry = await page.locator(board).evaluate(grid => {
             const rect = grid.getBoundingClientRect();
             const style = getComputedStyle(grid);
-            const axisWidth = parseFloat(style.getPropertyValue("--axis-width"));
-            const axisHeight = parseFloat(style.getPropertyValue("--axis-height"));
-            const square = (rect.width - axisWidth) / 10;
-            const paper = getComputedStyle(grid, "::before");
+            const square = parseFloat(style.getPropertyValue("--square"));
+            const axisWidth = square, axisHeight = square;
+            const sheet = document.getElementById("app");
+            const sheetRect = sheet.getBoundingClientRect();
+            const paper = getComputedStyle(sheet);
             const frame = getComputedStyle(grid, "::after");
-            // Compare the painted 1px grid-line centres with the frame and cells.
-            const paperX = parseFloat(paper.left) + parseFloat(paper.backgroundPositionX) + 0.5;
-            const paperY = parseFloat(paper.top) + parseFloat(paper.backgroundPositionY) + 0.5;
+            // Both boards must align with the same background, including after stacking on mobile.
+            const paperX = sheetRect.left + parseFloat(paper.borderLeftWidth)
+              + parseFloat(paper.backgroundPositionX.split(",")[1]) + 0.5;
+            const paperY = sheetRect.top + parseFloat(paper.borderTopWidth)
+              + parseFloat(paper.backgroundPositionY.split(",")[1]) + 0.5;
+            const offGrid = distance => Math.abs(distance - Math.round(distance / square) * square);
             const errors = [
-              Math.abs(paperX - axisWidth),
-              Math.abs(paperY - axisHeight),
-              Math.abs(parseFloat(frame.left) - paperX),
-              Math.abs(parseFloat(frame.top) - paperY),
+              Math.abs(square - Math.round(square)),
+              Math.abs(parseFloat(paper.backgroundSize.split(",")[1]) - square),
+              offGrid(rect.left + axisWidth - paperX),
+              offGrid(rect.top + axisHeight - paperY),
+              Math.abs(parseFloat(frame.left) - axisWidth),
+              Math.abs(parseFloat(frame.top) - axisHeight),
               Math.abs(parseFloat(frame.width) - 10 * square),
               Math.abs(parseFloat(frame.height) - 10 * square),
             ];

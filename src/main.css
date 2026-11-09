@@ -10,6 +10,11 @@
   font-weight: 100 1000;
   font-display: swap;
 }
+@property --square {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 32px;
+}
 
 :root {
   font-family: "DM Sans", sans-serif;
@@ -29,6 +34,7 @@
 }
 * { box-sizing: border-box; }
 body {
+  container-type: inline-size;
   margin: 0;
   padding: 24px 16px;
   background: radial-gradient(ellipse at 20% 0, #faf7ec, transparent 65%);
@@ -53,25 +59,35 @@ button:focus-visible, a:focus-visible {
   border: 0;
 }
 #app {
+  --sheet-columns: 23;
+  --sheet-padding: 34px;
+  --sheet-max-width: 1120px;
+  --square: round(down, calc((min(var(--sheet-max-width), 100cqw) - 2 * var(--sheet-padding) - 2px) / var(--sheet-columns)), 1px);
   position: relative;
-  max-width: 1120px;
+  width: calc(var(--sheet-columns) * var(--square) + 2 * var(--sheet-padding) + 2px);
+  max-width: var(--sheet-max-width);
   margin: auto;
-  padding: 0 34px 8px;
+  padding: 0 var(--sheet-padding) 8px;
   border: 1px solid #d8d6c9;
   background-color: var(--paper);
   background-image:
-    linear-gradient(90deg, transparent 19px, #d9888b60 19px, #d9888b60 20px, transparent 20px),
-    linear-gradient(#adc8d52b 1px, transparent 1px),
-    linear-gradient(90deg, #adc8d52b 1px, transparent 1px);
-  background-size: 100% 100%, 24px 24px, 24px 24px;
-  box-shadow: 0 8px 28px #48493812, 3px 4px 0 #f7f4e9, 4px 5px 0 #d4d1c4;
+    linear-gradient(#d9888b60, #d9888b60),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 1px 100%, var(--square) var(--square), var(--square) var(--square);
+  background-position:
+    calc(var(--sheet-padding) / 2) 0,
+    calc(var(--sheet-padding) - .5px) -.5px,
+    calc(var(--sheet-padding) - .5px) -.5px;
+  background-repeat: no-repeat, repeat, repeat;
+  box-shadow: 0 8px 28px #4849381a;
 }
 .masthead {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 12px;
-  padding: 18px 0 22px;
+  height: calc(3 * var(--square));
   text-align: center;
 }
 #rules-open { justify-self: start; }
@@ -103,34 +119,67 @@ h1::after {
 h2 { margin-bottom: 0; font-size: 29px; font-weight: 700; line-height: 1.15; }
 h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; }
 
-/* Little notes on the page, with coloured-pencil selection. */
+/* Sticky notes lift on hover and when selected. */
 .opponent-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .opponent {
   --pencil: #806025;
-  --wash: #fff2cb;
+  --wash: #fff2b4;
+  --note-paper: var(--wash);
+  --note-glue: #e8d47c;
+  --note-glue-depth: 22px;
+  --note-tilt: -1.2deg;
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   text-align: left;
   border: 1px solid transparent;
-  border-radius: 4px 9px 5px 8px;
+  border-radius: 2px 3px 18px 3px / 2px 2px 6px 4px;
   padding: 14px;
   background: transparent;
   color: var(--ink);
+  transform: rotate(var(--note-tilt));
+  transition: transform .15s;
 }
-.opponent:nth-child(2) { --pencil: #326b52; --wash: #e7f0dd; }
-.opponent:nth-child(3) { --pencil: #71528a; --wash: #eee6f5; }
-.opponent:nth-child(4) { --pencil: #a24e39; --wash: #fbe5d9; }
-.opponent-frame { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.opponent-outline { fill: var(--wash); stroke: var(--pencil); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.opponent-retrace { fill: none; stroke: var(--pencil); stroke-width: 1; stroke-linecap: round; opacity: 0; }
-.opponent:nth-child(even) .opponent-frame { transform: scaleX(-1); }
-.opponent:hover:enabled .opponent-outline { stroke-width: 2; }
-.opponent[aria-pressed="true"] .opponent-outline { stroke-width: 2.4; }
-.opponent[aria-pressed="true"] .opponent-retrace { opacity: .65; }
+.opponent:nth-child(2) { --pencil: #326b52; --wash: #e7efc5; --note-glue: #cbd8a0; --note-tilt: .8deg; }
+.opponent:nth-child(3) { --pencil: #71528a; --wash: #eee2f1; --note-glue: #d7bfdf; --note-tilt: .6deg; }
+.opponent:nth-child(4) { --pencil: #a24e39; --wash: #fbe1cc; --note-glue: #e7c1a5; --note-tilt: -1.1deg; }
+.opponent::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+}
+.opponent::after {
+  content: "";
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 65%;
+  height: 30%;
+  box-shadow: 1px 7px 7px #39382540;
+  transform: rotate(4deg) skew(3deg);
+  pointer-events: none;
+  z-index: -2;
+}
+.opponent:hover:enabled, .opponent[aria-pressed="true"] {
+  transform: translateY(-2px) rotate(var(--note-tilt));
+}
 .opponent-name, .opponent-description { position: relative; }
 .opponent .selection { z-index: 1; }
-.selection { position: absolute; top: 10px; right: 12px; color: var(--pencil); visibility: hidden; font-family: var(--hand); font-size: 24px; font-weight: 700; }
+.selection {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  width: 24px;
+  height: 28px;
+  visibility: hidden;
+  transform: rotate(18deg);
+  filter: drop-shadow(1px 2px 1px #2c3e4a35);
+  pointer-events: none;
+}
 .opponent[aria-pressed="true"] .selection { visibility: visible; }
 .opponent-name { padding-right: 22px; font-family: var(--hand); font-size: 28px; font-weight: 700; line-height: 1; display: block; margin-bottom: 10px; color: var(--pencil); }
 .opponent-name > span { font-family: "DM Sans", sans-serif; font-size: 11px; font-weight: 400; color: #526373; display: block; margin-top: 5px; }
@@ -140,24 +189,22 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
 .boards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px;
-  filter: drop-shadow(1px 3px 2px #29456224);
+  gap: var(--square);
 }
 .sea-panel {
-  --axis-width: 24px;
-  --axis-height: 28px;
+  --axis-width: var(--square);
+  --axis-height: var(--square);
   position: relative;
-  isolation: isolate;
   container-type: inline-size;
-  overflow: hidden;
-  background: var(--paper);
-  border: 1px solid transparent;
-  /* Only the paper silhouette is roughened; the playing grid stays straight. */
-  mask: url("/torn-paper.svg") 0 0 / 100% 100% no-repeat;
-  padding: 18px;
   min-width: 0;
 }
-.sea-heading { min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
+.sea-heading {
+  height: calc(2 * var(--square));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 
 .sea-heading h2 { position: relative; font-size: 31px; color: var(--pen); }
 .board-status { position: relative; flex: none; }
@@ -213,7 +260,7 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
 }
 #selected-opponent-description { display: none; }
 @container (max-width: 420px) {
-  .sea-heading { min-height: 60px; }
+  .sea-heading { height: calc(3 * var(--square)); }
   #opponent-setup { padding: 10px; gap: 8px; }
   .opponent-description {
     position: absolute;
@@ -241,29 +288,14 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
   }
 }
 
-/* Extend the board's graph paper behind the whole card, clipped by sea-panel.
-   Anchor it to the board so wrapped headings never shift the lines off-grid. */
+/* Both boards sit on the app's single sheet of graph paper. Whole-pixel squares
+   and whole-row spacing keep every frame aligned with the shared grid. */
 .sea-grid {
-  --square: calc((100cqw - var(--axis-width)) / 10);
   position: relative;
   display: grid;
   grid-template-columns: var(--axis-width) repeat(10, minmax(0, 1fr));
   grid-template-rows: var(--axis-height) repeat(10, var(--square));
   gap: 0;
-}
-.sea-grid::before {
-  content: "";
-  position: absolute;
-  inset: -100vmax;
-  z-index: -1;
-  background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: var(--square) var(--square);
-  background-position:
-    calc(100vmax + var(--axis-width) - .5px)
-    calc(100vmax + var(--axis-height) - .5px);
-  pointer-events: none;
 }
 /* A single frame centred on the same grid lines, without cell-border seams. */
 .sea-grid::after {
@@ -341,7 +373,12 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
 @media (hover: hover) and (pointer: fine) {
   .cell:enabled:hover::before { content: ""; }
 }
-.sea-footer { margin-top: 18px; padding-left: var(--axis-width); }
+.sea-footer {
+  height: var(--square);
+  padding-left: var(--axis-width);
+  display: flex;
+  align-items: center;
+}
 .fleet { container-type: inline-size; display: flex; justify-content: space-between; align-items: center; width: 100%; }
 .mini-ship { position: relative; display: flex; gap: 1px; }
 .mini-ship i { position: relative; width: 3.3cqw; height: 3.3cqw; }
@@ -447,13 +484,15 @@ body:has(dialog[open]) { overflow: hidden; }
   padding: 30px 28px 34px;
   overflow: auto;
   border-radius: 2px 3px 28px 4px / 3px 2px 8px 5px;
+  overscroll-behavior: contain;
+}
+.note-sheet, .opponent::before {
   background-color: var(--note-paper);
   background-image:
-    linear-gradient(180deg, var(--note-glue), transparent 36px),
+    linear-gradient(180deg, var(--note-glue), transparent var(--note-glue-depth, 36px)),
     radial-gradient(ellipse at 8% 0, #99712b14, transparent 60%),
     linear-gradient(174deg, transparent 65%, #fffef944 91%, #fffef9a6);
   box-shadow: inset 0 1px 0 #fffef970, inset 0 -1px 1px #8c7e4430, 0 1px 2px #3938251f;
-  overscroll-behavior: contain;
 }
 .paper-dialog::backdrop { background: #29456255; }
 .dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
@@ -472,14 +511,13 @@ body:has(dialog[open]) { overflow: hidden; }
 .rules li::before { content: "0" counter(brief); position: absolute; left: 0; color: var(--green); font: 700 21px/1.4 var(--hand); }
 .rules strong { color: var(--ink); font-weight: 600; }
 @media (max-width: 1000px) {
-  #app { padding-right: 24px; padding-left: 24px; }
-  .sea-panel { padding: 14px; }
+  #app { --sheet-padding: 24px; }
   .opponent { padding: 12px; }
 }
 @media (max-width: 720px) {
   body { padding: 8px 6px; }
-  #app { padding: 0 12px 4px; max-width: 540px; background-size: 100% 100%, 20px 20px, 20px 20px; }
-  .masthead { padding: 15px 0 19px; gap: 8px; }
+  #app { --sheet-columns: 11; --sheet-padding: 12px; --sheet-max-width: 540px; }
+  .masthead { gap: 8px; }
   h1 { font-size: 40px; padding: 0 4px; }
   .masthead-button { width: 44px; height: 44px; }
   .masthead-button > span {
@@ -493,9 +531,7 @@ body:has(dialog[open]) { overflow: hidden; }
     white-space: nowrap;
   }
   .note-sheet { padding: 28px 18px 30px; }
-  .boards { grid-template-columns: 1fr; gap: 18px; }
-  .sea-panel { --axis-width: 22px; --axis-height: 24px; padding: 14px 8px; }
-  .sea-heading { margin-bottom: 12px; }
+  .boards { grid-template-columns: 1fr; }
   .sea-heading h2 { font-size: 27px; }
   .winner-mark { font-size: 30px; }
   .pen-button { font-size: 22px; padding: 6px 10px; }
@@ -504,15 +540,13 @@ body:has(dialog[open]) { overflow: hidden; }
   .axis { font-size: 21px; }
   .cell { font-size: 28px; }
 
-  .sea-footer { margin-top: 14px; }
 
   .legend { gap: 12px; font-size: 11px; }
   .legend > span { gap: 5px; }
   .opponent-description { font-size: 12px; }
 }
 @media (max-width: 360px) {
-  #app { padding-right: 8px; padding-left: 8px; }
-  .sea-panel { padding-right: 6px; padding-left: 6px; }
+  #app { --sheet-padding: 8px; }
   .sea-heading h2 { font-size: 25px; }
   #replay { font-size: 20px; gap: 4px; padding: 6px 8px; }
   #replay .pen-button-icon { width: 19px; height: 19px; }

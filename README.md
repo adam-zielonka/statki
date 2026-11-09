@@ -1,7 +1,8 @@
 # Statki
 
 Klasyczna bitwa morska dla jednego gracza, z interfejsem PL/EN na komputer i telefon.
-Jasny interfejs przypomina kartkę w kratkę: statki są bez wypełnienia,
+Obie plansze, nagłówki i tło tworzą jedną kartkę ze wspólną, ciągłą siatką.
+Statki są bez wypełnienia,
 obrysowane lekko nierówną kreską granatowego „długopisu”, a trafienia wyglądają jak ręcznie stawiane iksy. Po zatopieniu
 iksy zostają, a cały statek wyróżnia wspólny obrys bez wypełnienia.
 Odręczne nagłówki i kolorowe notatki uzupełniają papierowy styl.
