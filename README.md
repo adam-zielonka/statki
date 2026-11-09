@@ -26,11 +26,17 @@ pozostałych statków. Ukryte położenia floty nie są przekazywane algorytmom.
 
 Plansza rywala jest widoczna od początku, a cztery kafelki wyboru leżą na jej kratce
 i znikają po starcie. Na wąskiej planszy opis dotyczy wybranego przeciwnika.
-Losowanie znajduje się przy nagłówku Twojej floty, a rozpoczęcie bitwy przy flocie rywala.
-W nagłówku planszy rywala pojawia się zielone „Atakujesz”, gdy możesz strzelać,
-a podczas ruchu przeciwnika przy Twojej flocie czerwone „Jesteś atakowany”.
-Oba komunikaty mają odręczną obwódkę. Po zakończeniu gry zwycięzca
-otrzymuje zielony napis, a przy przegranej flocie pojawia się przycisk rewanżu.
+Zasady i ustawienia znajdują się po bokach logo; na małym ekranie zmniejszają
+się do samych ikon z zachowanymi dostępnymi nazwami. Losowanie jest nad własną
+planszą, a start nad planszą przeciwnika — w miejscu późniejszych komunikatów
+ataku. Odstępy między przyciskami i logo są niezależne od kratki.
+Plansze podpisane są małymi karteczkami samoprzylepnymi: imieniem rywala
+oraz „Ja”. Zaczynają się w połowie pierwszej kratki, na tej samej wysokości
+co przyciski i komunikaty „Atakujesz” / „Jesteś atakowany”, nad cyframi kolumn.
+Po zakończeniu gry logo zastępuje wyrwana kartka z zeszytu w kratkę
+z napisem „Wygrałeś” albo „Przegrałeś” i przyciskiem rewanżu wewnątrz kartki.
+Kartka może nachodzić na plansze i nie zmienia ich położenia.
+Gdy statek przylega do brzegu planszy, ramka zastępuje tę krawędź jego obrysu.
 Przyciski przy krawędziach nagłówka otwierają okna zasad i ustawień.
 W ustawieniach wybierzesz tempo
 rywala (spokojne, zwykłe lub szybkie), język, rozpoczniesz nową grę i otworzysz GitHub.

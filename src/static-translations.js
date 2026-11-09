@@ -1,7 +1,6 @@
 /* eslint max-len: ["warn", { "code": 120, "ignoreStrings": true }] */
 // Static, trusted HTML fragments; never populate this catalogue from user input.
 export const staticText = {
-  "#title": "statki",
   "#settings-title": "Ustawienia",
   "#settings-button-label": "Ustawienia",
   "#rules-button-label": "Zasady gry",
@@ -16,7 +15,7 @@ export const staticText = {
   "#shuffle-label": "Losuj flotę",
   "#start-label": "Rozpocznij bitwę",
   "#replay-label": "Zagraj ponownie",
-  "#player-title": "Twoja flota",
+  "#player-title": "Ja",
   ".legend > span:nth-child(1)": "<i class=\"legend-ship\"></i>Twój statek",
   ".legend > span:nth-child(2)": "<i class=\"legend-miss\">·</i>Pudło",
   ".legend > span:nth-child(3)": "<i class=\"legend-hit pen-cross\">×</i>Trafienie",

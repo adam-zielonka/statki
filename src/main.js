@@ -11,13 +11,6 @@ const updateEnemy = createBoard($("enemy-board"), (row, col) =>
   game.fire(row, col),
 );
 const updatePlayer = createBoard($("player-board"));
-const possessive = {
-  random: "Felka",
-  hunter: "Hugona",
-  parity: "Ady",
-  sonar: "Leny",
-};
-
 for (const opponent of OPPONENTS) {
   const button = document.createElement("button");
   button.type = "button";
@@ -54,20 +47,20 @@ function update() {
   const turnLabel = t(yourTurn ? "Atakujesz" : "Jesteś atakowany");
   for (const actor of ["player", "enemy"]) {
     const status = $(`${actor}-status`);
-    const winner = over && game.winner === actor;
     const target = activeTurn && actor === (yourTurn ? "enemy" : "player");
-    status.hidden = !winner && !target;
-    status.dataset.state = winner ? "winner" : target ? turnState : "idle";
-    status.className = `board-status${winner ? " winner-mark" : target ? " turn-mark" : ""}`;
-    status.textContent = winner ? t("Wygrana!!!") : target ? turnLabel : "";
+    status.hidden = !target;
+    status.dataset.state = target ? turnState : "idle";
+    status.className = `board-status${target ? " turn-mark" : ""}`;
+    status.textContent = target ? turnLabel : "";
   }
+  const title = $("title");
+  const resultCard = $("result-card");
+  resultCard.classList.toggle("result-note", over);
+  resultCard.classList.toggle("notebook-scrap", over);
+  resultCard.dataset.result = over ? game.winner === "player" ? "win" : "loss" : "";
+  title.textContent = t(over ? game.winner === "player" ? "Wygrałeś" : "Przegrałeś" : "statki");
   const replay = $("replay");
   replay.hidden = !over;
-  if (over) {
-    const loser = game.winner === "player" ? "enemy" : "player";
-    const heading = $(`${loser}-title`).closest(".sea-heading");
-    if (replay.parentElement !== heading) heading.append(replay);
-  }
   const latest = game.history[0];
   const turn = t(yourTurn ? "Twój ruch." : "Ruch przeciwnika.");
   const result = latest
@@ -107,9 +100,8 @@ function update() {
     );
     button.disabled = !setup;
   }
-  $("enemy-title").textContent = t("Flota {name}", {
-    name: language === "pl" ? possessive[game.strategy] : opponent.name,
-  });
+  $("enemy-title").textContent = opponent.name;
+  $("enemy-title").dataset.opponent = opponent.id;
   updateEnemy(game.enemy, {
     interactive: activeTurn && yourTurn,
     reveal: over,

@@ -1,4 +1,21 @@
 import { test, expect } from "@playwright/test";
+import { generateShips } from "../src/utils.js";
+
+// Fleet fixture for prepare()'s seed: generate the player's fleet, then the enemy's.
+function enemyFleet() {
+  const original = Math.random;
+  let seed = 117;
+  Math.random = () => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 2 ** 32;
+  };
+  try {
+    generateShips();
+    return generateShips().flat();
+  } finally {
+    Math.random = original;
+  }
+}
 
 // Keep the browser's native clock: replacing it masks Window timer receiver errors.
 async function prepare(page) {
@@ -83,30 +100,79 @@ test("a new game cancels a native timer before the first enemy shot", async ({ p
   expect(errors).toEqual([]);
 });
 
-test("turn labels give way to the winner and reset on a rematch", async ({ page }) => {
-  test.setTimeout(90000);
-  const errors = await prepare(page);
-  await page.locator('.opponent[data-id="sonar"]').click();
-  await page.locator("#settings-open").click();
-  await page.locator('[data-delay="250"]').click();
-  await page.locator(".settings .dialog-close").click();
-  await page.locator("#start").click();
-  for (let shot = 0; shot < 100; shot++) {
-    await page.waitForFunction(() => document.querySelector('#enemy-board button:enabled, .winner-mark:not([hidden])'));
-    if (await page.locator(".winner-mark:visible").count()) break;
+for (const outcome of ["win", "loss"]) {
+  test(`${outcome} replaces the logo with a notebook result and resets on a rematch`, async ({ page }) => {
+    test.setTimeout(90000);
+    await page.setViewportSize({ width: 390, height: 844 });
+    const errors = await prepare(page);
+    const boardPositions = () => page.locator(".sea-grid").evaluateAll(boards =>
+      boards.map(board => board.getBoundingClientRect().top + scrollY));
+    const initialPositions = await boardPositions();
+    await page.locator('.opponent[data-id="sonar"]').click();
+    await page.locator("#settings-open").click();
+    await page.locator('[data-delay="250"]').click();
+    await page.locator(".settings .dialog-close").click();
+    await page.locator("#start").click();
+    const targets = enemyFleet();
+    for (let shot = 0; shot < 100; shot++) {
+      await page.waitForFunction(() => document.querySelector('#enemy-board button:enabled, #result-card.result-note'));
+      if (await page.locator("#result-card.result-note").count()) break;
+      await expect(page.locator("#enemy-status")).toHaveText("Atakujesz");
+      const target = outcome === "win"
+        ? page.locator("#enemy-board").getByRole("button", { name: `${targets[shot]}: nieodkryte`, exact: true })
+        : page.locator("#enemy-board button:enabled").first();
+      await target.click();
+    }
+    await expect(page.locator(".result-note #title")).toHaveText(outcome === "win" ? "Wygrałeś" : "Przegrałeś");
+    await expect(page.locator("#result-card")).toHaveAttribute("data-result", outcome);
+    expect(await boardPositions()).toEqual(initialPositions);
+    await expect(page.locator(".board-status:visible")).toHaveCount(0);
+    await expect(page.locator(".winner-mark")).toHaveCount(0);
+    const replayBox = await page.locator("#replay").boundingBox();
+    const cardBox = await page.locator("#result-card").boundingBox();
+    await expect(page.locator("#result-card #replay")).toBeVisible();
+    expect(replayBox.x).toBeGreaterThan(cardBox.x);
+    expect(replayBox.x + replayBox.width).toBeLessThan(cardBox.x + cardBox.width);
+    expect(replayBox.y + replayBox.height).toBeLessThan(cardBox.y + cardBox.height);
+    const frameEdges = await page.locator(".ship-outline").evaluateAll(cells => {
+      const coverage = new Set(), duplicates = [];
+      for (const cell of cells) {
+        const boundaries = [
+          ["top", cell.dataset.row === "0"], ["right", cell.dataset.col === "9"],
+          ["bottom", cell.dataset.row === "9"], ["left", cell.dataset.col === "0"],
+        ];
+        for (const [edge, touchesFrame] of boundaries) {
+          if (!touchesFrame) continue;
+          coverage.add(edge);
+          if (cell.classList.contains(`edge-${edge}`)) duplicates.push(`${edge}: ${cell.getAttribute("aria-label")}`);
+        }
+      }
+      return { coverage: [...coverage].sort(), duplicates };
+    });
+    expect(frameEdges.coverage).toEqual(["bottom", "left", "right", "top"]);
+    expect(frameEdges.duplicates).toEqual([]);
+    await expect(page.locator(".ship-outline.edge-left:not([data-col='0'])").first()).toBeVisible();
+    const mask = await page.locator("#result-card").evaluate(card => getComputedStyle(card, "::before").maskImage);
+    expect(mask).toContain("notebook-scrap.svg");
+    expect(await page.locator(".masthead button:visible").evaluateAll(nodes => nodes.map(node => node.id)))
+      .toEqual(["rules-open", "replay", "settings-open"]);
+    await page.locator("#settings-open").click();
+    await page.locator('[data-language="en"]').click();
+    await expect(page.locator(".result-note #title")).toHaveText(outcome === "win" ? "You won" : "You lost");
+    expect(await boardPositions()).toEqual(initialPositions);
+    await expect(page.locator("#player-title")).toHaveText("Me");
+    await page.locator('[data-language="pl"]').click();
+    await page.keyboard.press("Escape");
+    await page.locator("#replay").click();
+    await expect(page.locator("#title")).toHaveText("statki");
+    await expect(page.locator("#result-card")).not.toHaveClass(/result-note/);
+    await expect(page.locator("#opponent-setup")).toBeVisible();
+    await expect(page.locator(".board-status:visible")).toHaveCount(0);
+    await page.locator("#start").click();
     await expect(page.locator("#enemy-status")).toHaveText("Atakujesz");
-    await page.locator("#enemy-board button:enabled").first().click();
-  }
-  await expect(page.locator(".winner-mark:visible")).toHaveCount(1);
-  await expect(page.locator(".winner-mark:visible")).toHaveText("Wygrana!!!");
-  await expect(page.locator(".turn-mark:visible")).toHaveCount(0);
-  await page.locator("#replay").click();
-  await expect(page.locator("#opponent-setup")).toBeVisible();
-  await expect(page.locator(".board-status:visible")).toHaveCount(0);
-  await page.locator("#start").click();
-  await expect(page.locator("#enemy-status")).toHaveText("Atakujesz");
-  expect(errors).toEqual([]);
-});
+    expect(errors).toEqual([]);
+  });
+}
 
 for (const mobile of [false, true]) {
   test(`hit and sunk stay distinct on both boards (${mobile ? "touch" : "keyboard"})`, async ({ browser }) => {
@@ -151,7 +217,7 @@ for (const mobile of [false, true]) {
         await target.focus();
         await page.keyboard.press(shot % 2 ? "Space" : "Enter");
       }
-      await page.waitForFunction(() => document.querySelector("#enemy-status[data-state=attacking], .winner-mark:not([hidden])"));
+      await page.waitForFunction(() => document.querySelector("#enemy-status[data-state=attacking], #result-card.result-note"));
       const current = await snapshot();
       current.forEach(board => board.forEach(cell => {
         if (cell.sunk) expect(cell.mark).toBe("×");

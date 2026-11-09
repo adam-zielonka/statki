@@ -21,6 +21,23 @@ for (const width of [320, 390, 844, 1280]) {
       expect(Math.abs(coverage.right - coverage.viewportWidth)).toBeLessThan(0.2);
       expect(coverage.top).toBeLessThanOrEqual(0.2);
       expect(coverage.bottom).toBeGreaterThanOrEqual(coverage.viewportHeight - 0.2);
+      const title = await page.locator("#title").boundingBox();
+      for (const button of await page.locator(".masthead button:visible").all()) {
+        const box = await button.boundingBox();
+        const overlaps = Math.max(box.x, title.x) < Math.min(box.x + box.width, title.x + title.width)
+          && Math.max(box.y, title.y) < Math.min(box.y + box.height, title.y + title.height);
+        expect(overlaps).toBe(false);
+        await expect(button).toHaveAccessibleName(/.+/);
+        const label = await button.locator(":scope > span").boundingBox();
+        if (width <= 720) {
+          expect(box.width).toBe(44);
+          expect(box.height).toBeGreaterThanOrEqual(44);
+          expect(label.width).toBeLessThanOrEqual(1);
+        } else {
+          expect(label.width).toBeGreaterThan(10);
+          expect(label.height).toBeGreaterThan(10);
+        }
+      }
       for (const board of ["#player-board", "#enemy-board"]) {
         if (await page.locator(board).isVisible()) {
           const box = await page.locator(board).boundingBox();
@@ -28,6 +45,14 @@ for (const width of [320, 390, 844, 1280]) {
           expect(box.x + box.width).toBeLessThanOrEqual(width);
           const cell = await page.locator(`${board} .cell`).first().boundingBox();
           expect(cell.width).toBeGreaterThanOrEqual(24);
+          const note = await page.locator(board).evaluate(grid => {
+            const rect = grid.closest(".sea-panel").querySelector(".name-note").getBoundingClientRect();
+            return { left: rect.left, bottom: rect.bottom };
+          });
+          expect(note.bottom).toBeGreaterThan(box.y - 4);
+          expect(note.bottom).toBeLessThan(box.y + cell.height / 3);
+          expect(note.bottom).toBeLessThan(cell.y - 3);
+          expect(Math.abs(note.left - cell.x - cell.width / 2)).toBeLessThan(2);
           const geometry = await page.locator(board).evaluate(grid => {
             const rect = grid.getBoundingClientRect();
             const style = getComputedStyle(grid);
@@ -78,12 +103,17 @@ for (const width of [320, 390, 844, 1280]) {
       expect(legend.height).toBeGreaterThan(0);
     };
     await expect(page.locator("#opponent-setup")).toBeVisible();
+    expect(await page.locator(".masthead button:visible").evaluateAll(nodes => nodes.map(node => node.id)))
+      .toEqual(["rules-open", "settings-open"]);
+    await expect(page.locator(".enemy-panel .sea-controls #start")).toBeVisible();
+    await expect(page.locator(".own-panel .sea-controls #shuffle")).toBeVisible();
     await expect(page.locator(".command-bar, #pause, .log-panel, footer, details, .brand-dot")).toHaveCount(0);
     await expect(page.locator("#rules-dialog, #settings-dialog")).toHaveCount(2);
     await expect(page.locator("#enemy-board")).toBeVisible();
     await expect(page.locator("#enemy-board button:enabled")).toHaveCount(0);
     await page.locator(".opponent[data-id=\"sonar\"]").click();
-    await expect(page.locator("#enemy-title")).toHaveText("Flota Leny");
+    await expect(page.locator("#enemy-title")).toHaveText("Lena");
+    await expect(page.locator("#player-title")).toHaveText("Ja");
     const before = await page.locator("#player-board .cell").evaluateAll(cells => cells.map(c => c.className));
     await page.locator("#shuffle").click();
     const after = await page.locator("#player-board .cell").evaluateAll(cells => cells.map(c => c.className));
@@ -92,6 +122,7 @@ for (const width of [320, 390, 844, 1280]) {
     await page.locator("#settings-open").click();
     await expect(page.locator(".settings .source-link")).toBeVisible();
     await page.locator("[data-language=\"en\"]").click();
+    await expect(page.locator("#player-title")).toHaveText("Me");
     await fits();
     await expect(page.getByRole("dialog", { name: "Settings", exact: true })).toBeVisible();
     await page.locator(".settings .dialog-close").focus();

@@ -81,7 +81,9 @@ export function createBoard(element, onShot) {
           for (const [edge, dr, dc] of [
             ["top", -1, 0], ["right", 0, 1], ["bottom", 1, 0], ["left", 0, -1],
           ]) {
-            if (!outlined(row + dr, col + dc)) button.classList.add(`edge-${edge}`);
+            // At the perimeter, the board's frame already supplies this edge.
+            if (board.cells[row + dr]?.[col + dc] && !outlined(row + dr, col + dc))
+              button.classList.add(`edge-${edge}`);
           }
         }
         const marked = cell.state === "hit" || cell.state === "sunk";

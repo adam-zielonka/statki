@@ -1,6 +1,8 @@
 /* eslint max-len: ["warn", { "code": 120, "ignoreStrings": true }] */
 const translations = {
-  "Wygrana!!!": "Victory!!!",
+  "Wygrałeś": "You won",
+  "Przegrałeś": "You lost",
+  Ja: "Me",
   "Atakujesz": "You’re attacking",
   "Jesteś atakowany": "You’re under attack",
   "statki": "battleship",
@@ -83,7 +85,6 @@ const translations = {
   "Nowa gra": "New game",
   "Wybierz styl przeciwnika": "Choose an opponent’s style",
   "Zmiana rywala przy nowej grze": "Change opponents in a new game",
-  "Flota {name}": "{name}’s fleet",
   Ty: "You",
   Zatopiony: "Sunk",
   Trafiony: "Hit",

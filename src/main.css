@@ -95,12 +95,17 @@ button:focus-visible, a:focus-visible {
 }
 .masthead {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 240px) minmax(0, 1fr);
   align-items: center;
   gap: 12px;
-  height: calc(3 * var(--square));
+  /* Leave a whole-row space for the boards; the controls inside use their
+     own padding and natural heights, independent of the notebook squares. */
+  height: round(up, 96px, var(--square));
+  padding: 16px 0;
   text-align: center;
 }
+.masthead-center { position: relative; display: grid; place-items: center; width: 100%; height: 64px; }
+.masthead-title { display: grid; justify-items: center; justify-self: center; gap: 8px; min-width: 0; }
 #rules-open { justify-self: start; }
 #settings-open { justify-self: end; }
 h1, h2, h3, p { margin-top: 0; }
@@ -116,7 +121,7 @@ h1 {
   line-height: 1.1;
   letter-spacing: -1px;
 }
-h1::after {
+.masthead-title:not(.result-note) h1::after {
   content: "";
   position: absolute;
   bottom: -3px;
@@ -130,15 +135,52 @@ h1::after {
 h2 { margin-bottom: 0; font-size: 29px; font-weight: 700; line-height: 1.15; }
 h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; }
 
+/* Torn notebook scraps have their own small grid and irregular paper edge. */
+.notebook-scrap {
+  position: relative;
+  isolation: isolate;
+  filter: drop-shadow(1px 3px 2px #39382530);
+}
+.notebook-scrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(#b9d1d970 1px, transparent 1px),
+    linear-gradient(90deg, #b9d1d970 1px, transparent 1px);
+  background-size: 18px 18px;
+  background-position: 5px 6px;
+  mask: url("/notebook-scrap.svg") 0 0 / 100% 100% no-repeat;
+  pointer-events: none;
+}
+.result-note {
+  position: absolute;
+  z-index: 6;
+  top: -12px;
+  left: 50%;
+  width: max-content;
+  max-width: 100%;
+  padding: 12px 24px;
+  color: var(--green);
+  transform: translateX(-50%) rotate(-3deg);
+}
+.result-note h1 { padding: 0; color: inherit; font-size: 38px; letter-spacing: 0; white-space: nowrap; }
+.result-note .pen-button { max-width: 100%; font-size: 22px; white-space: normal; }
+.result-note[data-result="loss"] { color: var(--red); }
+
 /* Sticky notes lift on hover and when selected. */
 .opponent-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.opponent {
+.opponent, .name-note {
   --pencil: #806025;
   --wash: #fff2b4;
   --note-paper: var(--wash);
   --note-glue: #e8d47c;
   --note-glue-depth: 22px;
   --note-tilt: -1.2deg;
+}
+.opponent {
   position: relative;
   isolation: isolate;
   display: flex;
@@ -152,10 +194,10 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
   transform: rotate(var(--note-tilt));
   transition: transform .15s;
 }
-.opponent:nth-child(2) { --pencil: #326b52; --wash: #e7efc5; --note-glue: #cbd8a0; --note-tilt: .8deg; }
-.opponent:nth-child(3) { --pencil: #71528a; --wash: #eee2f1; --note-glue: #d7bfdf; --note-tilt: .6deg; }
-.opponent:nth-child(4) { --pencil: #a24e39; --wash: #fbe1cc; --note-glue: #e7c1a5; --note-tilt: -1.1deg; }
-.opponent::before {
+.opponent:nth-child(2), .name-note[data-opponent="hunter"] { --pencil: #326b52; --wash: #e7efc5; --note-glue: #cbd8a0; --note-tilt: .8deg; }
+.opponent:nth-child(3), .name-note[data-opponent="parity"] { --pencil: #71528a; --wash: #eee2f1; --note-glue: #d7bfdf; --note-tilt: .6deg; }
+.opponent:nth-child(4), .name-note[data-opponent="sonar"] { --pencil: #a24e39; --wash: #fbe1cc; --note-glue: #e7c1a5; --note-tilt: -1.1deg; }
+.opponent::before, .name-note::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -163,7 +205,7 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
   pointer-events: none;
   z-index: -1;
 }
-.opponent::after {
+.opponent::after, .name-note::after {
   content: "";
   position: absolute;
   right: 5px;
@@ -205,23 +247,49 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
 .sea-panel {
   --axis-width: var(--square);
   --axis-height: var(--square);
+  --heading-offset: calc(var(--axis-height) / 2 - 14px);
   position: relative;
   container-type: inline-size;
   min-width: 0;
 }
 .sea-heading {
-  height: calc(2 * var(--square));
+  height: var(--square);
+  position: relative;
+  z-index: 4;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 8px;
+  padding: 0 8px 0 calc(1.5 * var(--axis-width));
+  pointer-events: none;
 }
 
-.sea-heading h2 { position: relative; font-size: 31px; color: var(--pen); }
+.name-note {
+  position: relative;
+  isolation: isolate;
+  flex: none;
+  min-width: 78px;
+  padding: 6px 14px 9px;
+  border-radius: 2px 3px 16px 3px / 2px 2px 5px 3px;
+  color: var(--pencil);
+  font-size: 31px;
+  text-align: center;
+  transform: translateY(var(--heading-offset)) rotate(var(--note-tilt));
+}
 .board-status { position: relative; flex: none; }
+.sea-controls {
+  display: flex;
+  justify-content: flex-end;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 60%;
+  transform: translateY(var(--heading-offset));
+  pointer-events: auto;
+}
+.sea-controls .pen-button { min-width: 0; max-width: 100%; padding: 6px 8px; font-size: 23px; white-space: normal; transform: rotate(-2deg); }
 .turn-mark {
   flex-shrink: 1;
-  max-width: 55%;
+  max-width: 100%;
   padding: 4px 8px;
   color: var(--green);
   font: 700 26px/1 var(--hand);
@@ -237,26 +305,6 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
   mask: url("/pen-ellipse.svg") center / 100% 100% no-repeat;
   pointer-events: none;
 }
-.winner-mark {
-  position: relative;
-  flex: none;
-  color: #28723f;
-  font: 700 36px/1.1 var(--hand);
-  white-space: nowrap;
-  transform: rotate(-5deg);
-}
-.winner-mark::after {
-  content: "";
-  position: absolute;
-  left: 3px;
-  right: 0;
-  bottom: -2px;
-  height: 5px;
-  border-bottom: 2px solid currentColor;
-  border-radius: 50%;
-}
-
-
 .board-stage { position: relative; }
 #opponent-setup {
   position: absolute;
@@ -271,7 +319,8 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
 }
 #selected-opponent-description { display: none; }
 @container (max-width: 420px) {
-  .sea-heading { height: calc(3 * var(--square)); }
+  .sea-heading { height: calc(2 * var(--square)); }
+  .sea-controls .pen-button { font-size: 22px; }
   #opponent-setup { padding: 10px; gap: 8px; }
   .opponent-description {
     position: absolute;
@@ -289,29 +338,12 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
   #opponents .opponent-name > span { font-size: 11px; }
   #selected-opponent-description {
     display: block;
-    position: relative;
-    isolation: isolate;
     margin: 0;
     padding: 12px 14px;
     transform: rotate(-.5deg);
-    filter: drop-shadow(1px 3px 2px #39382530);
     font-size: 11px;
     line-height: 1.5;
     color: #46596b;
-  }
-  #selected-opponent-description::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background-color: var(--paper);
-    background-image:
-      linear-gradient(#b9d1d970 1px, transparent 1px),
-      linear-gradient(90deg, #b9d1d970 1px, transparent 1px);
-    background-size: 18px 18px;
-    background-position: 5px 6px;
-    mask: url("/notebook-scrap.svg") 0 0 / 100% 100% no-repeat;
-    pointer-events: none;
   }
 }
 
@@ -513,7 +545,7 @@ body:has(dialog[open]) { overflow: hidden; }
   border-radius: 2px 3px 28px 4px / 3px 2px 8px 5px;
   overscroll-behavior: contain;
 }
-.note-sheet, .opponent::before {
+.note-sheet, .opponent::before, .name-note::before {
   background-color: var(--note-paper);
   background-image:
     linear-gradient(180deg, var(--note-glue), transparent var(--note-glue-depth, 36px)),
@@ -539,27 +571,39 @@ body:has(dialog[open]) { overflow: hidden; }
 .rules strong { color: var(--ink); font-weight: 600; }
 @media (max-width: 1000px) {
   #app { --sheet-padding: 24px; }
+  h1 { font-size: 48px; }
+  .masthead-center { height: 53px; }
   .opponent { padding: 12px; }
 }
 @media (max-width: 720px) {
   #app { --sheet-columns: 11; --sheet-padding: 12px; --sheet-max-width: 540px; }
-  .masthead { gap: 8px; }
+  .masthead {
+    height: round(up, 80px, var(--square));
+    padding: 8px 0;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 8px;
+  }
+  .masthead-center { height: 44px; }
   h1 { font-size: 40px; padding: 0 4px; }
-  .masthead-button { width: 44px; height: 44px; }
+  .result-note { padding: 12px 20px; }
+  .result-note h1 { font-size: 34px; }
+  .masthead .masthead-button {
+    width: 44px;
+    height: 44px;
+    padding: 8px;
+  }
   .masthead-button > span {
     position: absolute;
     width: 1px;
     height: 1px;
-    padding: 0;
     margin: -1px;
+    padding: 0;
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
   }
   .note-sheet { padding: 28px 18px 30px; }
   .boards { grid-template-columns: 1fr; }
-  .sea-heading h2 { font-size: 27px; }
-  .winner-mark { font-size: 30px; }
   .pen-button { font-size: 22px; padding: 6px 10px; }
   .pen-button-icon { width: 21px; height: 21px; }
 
@@ -573,9 +617,6 @@ body:has(dialog[open]) { overflow: hidden; }
 }
 @media (max-width: 360px) {
   #app { --sheet-padding: 8px; }
-  .sea-heading h2 { font-size: 25px; }
-  #replay { font-size: 20px; gap: 4px; padding: 6px 8px; }
-  #replay .pen-button-icon { width: 19px; height: 19px; }
   .opponent { padding: 10px; }
   .cell::before { inset: 2px; }
 }

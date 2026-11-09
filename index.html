@@ -20,7 +20,20 @@
           <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none"><path d="M5.4 3.6Q12 3 18.8 4L18.3 20.3Q12 19.9 5.1 20.5ZM8.3 8.1L15.7 7.8M8.2 11.7L15.5 12M8 15.5L13.5 15.3"/></svg>
           <span id="rules-button-label">Zasady gry</span>
         </button>
-        <h1 id="title">statki</h1>
+        <div class="masthead-center">
+          <div id="result-card" class="masthead-title">
+            <h1 id="title">statki</h1>
+            <button id="replay" type="button" class="pen-button" hidden>
+              <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none">
+                <path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/>
+              </svg>
+              <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+                <path d="M4.2 9.1C6.3 4.3 11.8 2.5 16.3 5.1C20.6 7.5 21.4 13.6 18.1 17.3C15.1 20.7 9.7 21 6.2 17.5M4.4 3.8L3.5 9.9L9.4 9.3"/>
+              </svg>
+              <span id="replay-label">Zagraj ponownie</span>
+            </button>
+          </div>
+        </div>
         <button id="settings-open" type="button" class="pen-button masthead-button" aria-haspopup="dialog" aria-controls="settings-dialog">
           <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none"><path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/></svg>
           <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none"><path d="M3.5 6L7.5 6.2M13 6L20.5 5.8M3.5 12.2L13 11.9M18.5 12L20.5 12.2M3.5 18.2L6 18M11.5 18.1L20.5 17.8M13 6C13.3 9.6 7.4 9.8 7.5 6.1C7.2 2.6 13 2.5 13 6ZM18.5 12C18.7 15.6 12.9 15.7 13 12C12.8 8.4 18.7 8.3 18.5 12ZM11.5 18C11.9 21.6 5.9 21.7 6 18C5.8 14.5 11.6 14.4 11.5 18Z"/></svg>
@@ -36,28 +49,19 @@
               aria-labelledby="enemy-title"
             >
               <div class="sea-heading">
-                <div>
-                  <h2 id="enemy-title">Flota Hugona</h2>
+                <h2 id="enemy-title" class="name-note" data-opponent="hunter">Hugo</h2>
+                <div class="sea-controls">
+                  <button id="start" type="button" class="pen-button start-battle">
+                    <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none">
+                      <path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/>
+                    </svg>
+                    <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+                      <path d="M6.3 3.9Q13.2 7.3 20.1 11.8Q13.7 16.2 6.1 20.3Q6.7 12.4 6.3 3.9M7 4.8L18.5 11.9"/>
+                    </svg>
+                    <span id="start-label">Rozpocznij bitwę</span>
+                  </button>
+                  <span id="enemy-status" class="board-status" data-state="idle" hidden></span>
                 </div>
-                <span id="enemy-status" class="board-status" data-state="idle" hidden></span>
-                <button id="start" type="button" class="pen-button start-battle">
-                  <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none">
-                    <path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/>
-                  </svg>
-                  <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-                    <path d="M6.3 3.9Q13.2 7.3 20.1 11.8Q13.7 16.2 6.1 20.3Q6.7 12.4 6.3 3.9M7 4.8L18.5 11.9"/>
-                  </svg>
-                  <span id="start-label">Rozpocznij bitwę</span>
-                </button>
-                <button id="replay" type="button" class="pen-button" hidden>
-                  <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none">
-                    <path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/>
-                  </svg>
-                  <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-                    <path d="M4.2 9.1C6.3 4.3 11.8 2.5 16.3 5.1C20.6 7.5 21.4 13.6 18.1 17.3C15.1 20.7 9.7 21 6.2 17.5M4.4 3.8L3.5 9.9L9.4 9.3"/>
-                  </svg>
-                  <span id="replay-label">Zagraj ponownie</span>
-                </button>
               </div>
               <div class="board-stage">
                 <div
@@ -68,7 +72,7 @@
                 ></div>
                 <div id="opponent-setup">
                   <div id="opponents" class="opponent-grid" role="group" aria-label="Wybór przeciwnika"></div>
-                  <p id="selected-opponent-description"></p>
+                  <p id="selected-opponent-description" class="notebook-scrap"></p>
                 </div>
               </div>
               <div class="sea-footer">
@@ -81,19 +85,19 @@
             </section>
             <section class="sea-panel own-panel" aria-labelledby="player-title">
               <div class="sea-heading">
-                <div>
-                  <h2 id="player-title">Twoja flota</h2>
+                <h2 id="player-title" class="name-note">Ja</h2>
+                <div class="sea-controls">
+                  <button id="shuffle" type="button" class="pen-button">
+                    <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none">
+                      <path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/>
+                    </svg>
+                    <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+                      <path d="M19.7 8.4C18.6 4.7 14.8 2.8 10.9 3.7C7.3 4.4 4.9 7.6 5.1 10.4M16 8.9L20.6 9.5L21 4.6M4.3 15.5C5.7 19.4 9.5 21.3 13.4 20.3C17 19.4 19.3 16.4 19 13.4M8.3 15L3.5 14.4L3 19.3"/>
+                    </svg>
+                    <span id="shuffle-label">Losuj flotę</span>
+                  </button>
+                  <span id="player-status" class="board-status" data-state="idle" hidden></span>
                 </div>
-                <span id="player-status" class="board-status" data-state="idle" hidden></span>
-                <button id="shuffle" type="button" class="pen-button">
-                  <svg class="pen-button-frame" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true" fill="none">
-                    <path d="M4 5Q72 2 155 5L156 43Q82 47 4 43Q2 25 4 5Z" vector-effect="non-scaling-stroke"/>
-                  </svg>
-                  <svg class="pen-button-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none">
-                    <path d="M19.7 8.4C18.6 4.7 14.8 2.8 10.9 3.7C7.3 4.4 4.9 7.6 5.1 10.4M16 8.9L20.6 9.5L21 4.6M4.3 15.5C5.7 19.4 9.5 21.3 13.4 20.3C17 19.4 19.3 16.4 19 13.4M8.3 15L3.5 14.4L3 19.3"/>
-                  </svg>
-                  <span id="shuffle-label">Losuj flotę</span>
-                </button>
               </div>
               <div
                 id="player-board"
