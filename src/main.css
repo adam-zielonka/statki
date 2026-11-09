@@ -32,7 +32,11 @@
   --purple: #71528a;
   --hand: "Caveat", "Segoe Print", cursive;
 }
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+  -webkit-user-select: none;
+  user-select: none;
+}
 body {
   container-type: inline-size;
   margin: 0;
