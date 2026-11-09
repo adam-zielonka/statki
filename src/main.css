@@ -291,10 +291,7 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
   display: grid;
   place-items: center;
   font: 400 32px/1 "DM Sans", sans-serif;
-  transition: background .12s;
 }
-.cell:enabled:hover { background: #f9edb8; }
-.cell:enabled:active { background: #f3dc8c; }
 .cell:focus-visible { outline: 3px solid var(--pen); outline-offset: -3px; z-index: 2; }
 .cell.ship-outline::after {
   --edge-top: none;
@@ -331,8 +328,7 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
 .cell[data-mark-variant="2"] .pen-cross::before { transform: rotate(-3deg) scale(1, .96); }
 .cell.miss { color: var(--pen); font-size: 28px; }
 .cell.blocked { color: #5f7080; font-size: 25px; }
-.cell.last-shot::before {
-  content: "";
+.cell::before {
   position: absolute;
   inset: 3px;
   border: 2px solid #9a6817;
@@ -340,6 +336,10 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
   transform: rotate(-8deg);
   pointer-events: none;
   z-index: 1;
+}
+.cell.last-shot::before { content: ""; }
+@media (hover: hover) and (pointer: fine) {
+  .cell:enabled:hover::before { content: ""; }
 }
 .sea-footer { margin-top: 18px; padding-left: var(--axis-width); }
 .fleet { container-type: inline-size; display: flex; justify-content: space-between; align-items: center; width: 100%; }
@@ -482,7 +482,7 @@ body:has(dialog[open]) { overflow: hidden; }
   #replay { font-size: 20px; gap: 4px; padding: 6px 8px; }
   #replay .pen-button-icon { width: 19px; height: 19px; }
   .opponent { padding: 10px; }
-  .cell.last-shot::before { inset: 2px; }
+  .cell::before { inset: 2px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
