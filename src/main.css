@@ -20,7 +20,7 @@
   font-family: "DM Sans", sans-serif;
   font-synthesis: none;
   color: #294562;
-  background: #eae5d9;
+  background: var(--paper);
   --ink: #294562;
   --pen: #315b91;
   --muted: #596b7d;
@@ -36,8 +36,6 @@
 body {
   container-type: inline-size;
   margin: 0;
-  padding: 24px 16px;
-  background: radial-gradient(ellipse at 20% 0, #faf7ec, transparent 65%);
 }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { font: inherit; cursor: pointer; touch-action: manipulation; }
@@ -62,25 +60,38 @@ button:focus-visible, a:focus-visible {
   --sheet-columns: 23;
   --sheet-padding: 34px;
   --sheet-max-width: 1120px;
-  --square: round(down, calc((min(var(--sheet-max-width), 100cqw) - 2 * var(--sheet-padding) - 2px) / var(--sheet-columns)), 1px);
+  --square: round(down, calc((min(var(--sheet-max-width), 100cqw) - 2 * var(--sheet-padding)) / var(--sheet-columns)), 1px);
   position: relative;
-  width: calc(var(--sheet-columns) * var(--square) + 2 * var(--sheet-padding) + 2px);
+  isolation: isolate;
+  width: calc(var(--sheet-columns) * var(--square) + 2 * var(--sheet-padding));
   max-width: var(--sheet-max-width);
+  min-height: 100dvh;
   margin: auto;
   padding: 0 var(--sheet-padding) 8px;
-  border: 1px solid #d8d6c9;
+}
+/* Extend the same scrolling paper to both viewport edges, even when the game
+   itself is narrower. The board-aligned grid continues through the margins. */
+#app::before {
+  --grid-start: calc((100cqw - var(--sheet-columns) * var(--square)) / 2 - .5px);
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc((100% - 100cqw) / 2);
+  width: 100cqw;
+  pointer-events: none;
+  z-index: -1;
   background-color: var(--paper);
   background-image:
-    linear-gradient(#d9888b60, #d9888b60),
+    linear-gradient(#cf4b55, #cf4b55),
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: 1px 100%, var(--square) var(--square), var(--square) var(--square);
   background-position:
-    calc(var(--sheet-padding) / 2) 0,
-    calc(var(--sheet-padding) - .5px) -.5px,
-    calc(var(--sheet-padding) - .5px) -.5px;
+    calc(var(--grid-start) - var(--square)) 0,
+    var(--grid-start) -.5px,
+    var(--grid-start) -.5px;
   background-repeat: no-repeat, repeat, repeat;
-  box-shadow: 0 8px 28px #4849381a;
 }
 .masthead {
   display: grid;
@@ -278,13 +289,29 @@ h3 { font-size: 23px; font-weight: 600; color: var(--pen); margin-bottom: 12px; 
   #opponents .opponent-name > span { font-size: 11px; }
   #selected-opponent-description {
     display: block;
+    position: relative;
+    isolation: isolate;
     margin: 0;
-    padding: 5px 7px;
-    background: #fffef9ed;
-    border-radius: 3px;
+    padding: 12px 14px;
+    transform: rotate(-.5deg);
+    filter: drop-shadow(1px 3px 2px #39382530);
     font-size: 11px;
     line-height: 1.5;
     color: #46596b;
+  }
+  #selected-opponent-description::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(#b9d1d970 1px, transparent 1px),
+      linear-gradient(90deg, #b9d1d970 1px, transparent 1px);
+    background-size: 18px 18px;
+    background-position: 5px 6px;
+    mask: url("/notebook-scrap.svg") 0 0 / 100% 100% no-repeat;
+    pointer-events: none;
   }
 }
 
@@ -515,7 +542,6 @@ body:has(dialog[open]) { overflow: hidden; }
   .opponent { padding: 12px; }
 }
 @media (max-width: 720px) {
-  body { padding: 8px 6px; }
   #app { --sheet-columns: 11; --sheet-padding: 12px; --sheet-max-width: 540px; }
   .masthead { gap: 8px; }
   h1 { font-size: 40px; padding: 0 4px; }

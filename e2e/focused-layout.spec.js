@@ -8,6 +8,19 @@ for (const width of [320, 390, 844, 1280]) {
     await page.goto("./");
     const fits = async () => {
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      const coverage = await page.locator("#app").evaluate(sheet => {
+        const rect = sheet.getBoundingClientRect(), paper = getComputedStyle(sheet, "::before");
+        const left = rect.left + parseFloat(paper.left);
+        return {
+          left, right: left + parseFloat(paper.width),
+          top: rect.top + parseFloat(paper.top), bottom: rect.bottom,
+          viewportWidth: document.documentElement.clientWidth, viewportHeight: innerHeight,
+        };
+      });
+      expect(Math.abs(coverage.left)).toBeLessThan(0.2);
+      expect(Math.abs(coverage.right - coverage.viewportWidth)).toBeLessThan(0.2);
+      expect(coverage.top).toBeLessThanOrEqual(0.2);
+      expect(coverage.bottom).toBeGreaterThanOrEqual(coverage.viewportHeight - 0.2);
       for (const board of ["#player-board", "#enemy-board"]) {
         if (await page.locator(board).isVisible()) {
           const box = await page.locator(board).boundingBox();
@@ -22,17 +35,21 @@ for (const width of [320, 390, 844, 1280]) {
             const axisWidth = square, axisHeight = square;
             const sheet = document.getElementById("app");
             const sheetRect = sheet.getBoundingClientRect();
-            const paper = getComputedStyle(sheet);
+            const paper = getComputedStyle(sheet, "::before");
             const frame = getComputedStyle(grid, "::after");
             // Both boards must align with the same background, including after stacking on mobile.
-            const paperX = sheetRect.left + parseFloat(paper.borderLeftWidth)
+            const paperX = sheetRect.left + parseFloat(paper.left)
               + parseFloat(paper.backgroundPositionX.split(",")[1]) + 0.5;
-            const paperY = sheetRect.top + parseFloat(paper.borderTopWidth)
+            const paperY = sheetRect.top + parseFloat(paper.top)
               + parseFloat(paper.backgroundPositionY.split(",")[1]) + 0.5;
+            const marginX = sheetRect.left + parseFloat(paper.left)
+              + parseFloat(paper.backgroundPositionX.split(",")[0]) + 0.5;
+            const boardLeft = sheet.querySelector("#enemy-board .cell").getBoundingClientRect().left;
             const offGrid = distance => Math.abs(distance - Math.round(distance / square) * square);
             const errors = [
               Math.abs(square - Math.round(square)),
               Math.abs(parseFloat(paper.backgroundSize.split(",")[1]) - square),
+              Math.abs(boardLeft - marginX - 2 * square),
               offGrid(rect.left + axisWidth - paperX),
               offGrid(rect.top + axisHeight - paperY),
               Math.abs(parseFloat(frame.left) - axisWidth),
