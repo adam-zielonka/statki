@@ -5,3 +5,7 @@ allowBuilds:
   core-js: false
   core-js-pure: false
   fsevents: false
+
+# This game uses plain CSS; do not install Vite's unused Stylus peer.
+overrides:
+  "vite>stylus": "-"
