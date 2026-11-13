@@ -1,5 +1,6 @@
 import { t } from "../i18n.js";
 import { coordinate } from "../engine/board.js";
+import { createBattleEffects } from "./battle-effects.js";
 
 const labels = {
   unknown: "nieodkryte",
@@ -62,7 +63,8 @@ export function createBoard(element, onShot) {
       element.append(button);
     }
   }
-  return (board, { interactive = false, reveal = false, last } = {}) => {
+  const updateEffects = createBattleEffects(element);
+  return (board, { interactive = false, reveal = false, last, finished = false, winner = false } = {}) => {
     for (let row = 0; row < 10; row++) {
       for (let col = 0; col < 10; col++) {
         const cell = board.cells[row][col],
@@ -97,5 +99,6 @@ export function createBoard(element, onShot) {
         );
       }
     }
+    updateEffects(board, { finished, winner });
   };
 }

@@ -103,11 +103,15 @@ function update() {
   $("enemy-title").textContent = opponent.name;
   $("enemy-title").dataset.opponent = opponent.id;
   updateEnemy(game.enemy, {
+    finished: over,
+    winner: game.winner === "enemy",
     interactive: activeTurn && yourTurn,
     reveal: over,
     last: game.history.find((item) => item.actor === "player"),
   });
   updatePlayer(game.player, {
+    finished: over,
+    winner: game.winner === "player",
     reveal: true,
     last: game.history.find((item) => item.actor === "enemy"),
   });

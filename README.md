@@ -36,6 +36,10 @@ co przyciski i komunikaty „Atakujesz” / „Jesteś atakowany”, nad cyframi
 Po zakończeniu gry logo zastępuje wyrwana kartka z zeszytu w kratkę
 z napisem „Wygrałeś” albo „Przegrałeś” i przyciskiem rewanżu wewnątrz kartki.
 Kartka może nachodzić na plansze i nie zmienia ich położenia.
+Po końcu partii na zatopionych statkach obu flot płonie rysowany ogień,
+a nad ocalałymi statkami zwycięzcy wystrzeliwują odręczne fajerwerki.
+Efekty znikają przy rewanżu. Przy ograniczeniu ruchu w systemie pozostają
+nieruchomymi rysunkami.
 Gdy statek przylega do brzegu planszy, ramka zastępuje tę krawędź jego obrysu.
 Przyciski przy krawędziach nagłówka otwierają okna zasad i ustawień.
 W ustawieniach wybierzesz tempo
