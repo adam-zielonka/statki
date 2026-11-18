@@ -20,7 +20,8 @@ jobs:
           node-version: 24.22.0
       - uses: pnpm/action-setup@v6
       - run: pnpm install --frozen-lockfile
-      - run: pnpm audit --audit-level=high
+      # GitHub withdrew this advisory. Remove the filter once npm drops the record.
+      - run: pnpm audit --audit-level=high --ignore GHSA-fc5q-39xc-vjpf
       - run: pnpm lint
       - run: pnpm test
       - run: pnpm build
