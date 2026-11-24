@@ -1,0 +1,75 @@
+.battle-effects {
+  position: absolute;
+  top: var(--axis-height);
+  left: var(--axis-width);
+  width: calc(10 * var(--square));
+  height: calc(10 * var(--square));
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+}
+.battle-effects path { stroke-linecap: round; stroke-linejoin: round; }
+.drawn-flame {
+  transform-box: fill-box;
+  transform-origin: 50% 95%;
+  animation: flame-flicker 1.15s ease-in-out var(--flame-delay) infinite alternate;
+}
+.flame-outer { fill: #f5b34cbb; stroke: #be583d; stroke-width: 4; }
+.flame-inner { fill: #fff1a6dd; stroke: #d88b31; stroke-width: 3; }
+.flame-pencil { fill: none; stroke: #a94b39; stroke-width: 2; opacity: .7; }
+.drawn-smoke {
+  fill: none;
+  stroke: #7a7b79;
+  stroke-width: 3;
+  opacity: .35;
+  animation: smoke-drift 3.8s ease-out var(--effect-delay) infinite;
+}
+.ship-firework { --spark-color: #9c752b; --spark-accent: #71528a; }
+.ship-firework[data-color="1"] { --spark-color: #315b91; --spark-accent: #b34451; }
+.ship-firework[data-color="2"] { --spark-color: #71528a; --spark-accent: #b87b2f; }
+.ship-firework[data-color="3"] { --spark-color: #326b52; --spark-accent: #315b91; }
+.firework-trail {
+  fill: none;
+  stroke: var(--spark-color);
+  stroke-width: 3;
+  stroke-dasharray: 18 82;
+  animation: firework-launch 3.4s ease-out var(--effect-delay) infinite;
+}
+.firework-burst {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: firework-bloom 3.4s ease-out var(--effect-delay) infinite;
+}
+.burst-ray, .burst-confetti { fill: none; stroke: var(--spark-color); stroke-width: 4; }
+.burst-ray.ray-1 { stroke: var(--spark-accent); }
+.burst-ray.ray-2 { stroke-width: 3; opacity: .75; }
+.burst-spark { fill: #fff2b4; stroke: var(--spark-accent); stroke-width: 3; }
+.burst-confetti { stroke: var(--spark-accent); stroke-width: 3; }
+
+@keyframes flame-flicker {
+  0% { transform: rotate(-5deg) skewX(-3deg) scale(.92, .93); }
+  40% { transform: rotate(2deg) skewX(2deg) scale(1.04, 1.07); }
+  75% { transform: rotate(-2deg) skewX(-1deg) scale(.97, 1.02); }
+  100% { transform: rotate(4deg) skewX(3deg) scale(1.03, .95); }
+}
+@keyframes smoke-drift {
+  0% { opacity: 0; transform: translate(0, 8px); }
+  25% { opacity: .38; }
+  100% { opacity: 0; transform: translate(15px, -45px); }
+}
+@keyframes firework-launch {
+  0% { opacity: 0; stroke-dashoffset: 18; }
+  8% { opacity: .75; }
+  28% { opacity: .6; stroke-dashoffset: -82; }
+  33%, 100% { opacity: 0; stroke-dashoffset: -82; }
+}
+@keyframes firework-bloom {
+  0%, 27% { opacity: 0; transform: scale(.18) rotate(-9deg); }
+  34% { opacity: 1; transform: scale(.52) rotate(-4deg); }
+  60% { opacity: .9; transform: scale(1.05) rotate(3deg); }
+  88%, 100% { opacity: 0; transform: scale(1.22) rotate(6deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .battle-effects * { animation: none !important; }
+  .firework-trail { display: none; }
+}

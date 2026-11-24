@@ -108,6 +108,7 @@ for (const outcome of ["win", "loss"]) {
     const boardPositions = () => page.locator(".sea-grid").evaluateAll(boards =>
       boards.map(board => board.getBoundingClientRect().top + scrollY));
     const initialPositions = await boardPositions();
+    await expect(page.locator(".battle-effects")).toHaveCount(0);
     await page.locator('.opponent[data-id="sonar"]').click();
     await page.locator("#settings-open").click();
     await page.locator('[data-delay="250"]').click();
@@ -122,12 +123,28 @@ for (const outcome of ["win", "loss"]) {
         ? page.locator("#enemy-board").getByRole("button", { name: `${targets[shot]}: nieodkryte`, exact: true })
         : page.locator("#enemy-board button:enabled").first();
       await target.click();
+      if (shot === 0) await expect(page.locator(".battle-effects")).toHaveCount(0);
     }
     await expect(page.locator(".result-note #title")).toHaveText(outcome === "win" ? "Wygrałeś" : "Przegrałeś");
     await expect(page.locator("#result-card")).toHaveAttribute("data-result", outcome);
     expect(await boardPositions()).toEqual(initialPositions);
     await expect(page.locator(".board-status:visible")).toHaveCount(0);
     await expect(page.locator(".winner-mark")).toHaveCount(0);
+    const winner = outcome === "win" ? "player" : "enemy";
+    await expect(page.locator(".battle-effects")).toHaveCount(2);
+    for (const actor of ["player", "enemy"]) {
+      const grid = page.locator(`#${actor}-board`);
+      const lost = await page.locator(`#${actor}-fleet .lost`).count();
+      const alive = await page.locator(`#${actor}-fleet .mini-ship:not(.lost)`).count();
+      await expect(grid.locator(".ship-fire")).toHaveCount(lost);
+      await expect(grid.locator(".fire-plume")).toHaveCount(await grid.locator(".sunk").count());
+      await expect(grid.locator(".ship-firework")).toHaveCount(actor === winner ? alive : 0);
+      await expect(grid.locator(".battle-effects")).toHaveAttribute("aria-hidden", "true");
+    }
+    const flame = await page.locator(".drawn-flame").first().elementHandle();
+    expect(await flame.evaluate(node => node.getAnimations().some(a => a.playState === "running"))).toBe(true);
+    expect(await page.locator(".firework-burst").first().evaluate(node =>
+      node.getAnimations().some(a => a.playState === "running"))).toBe(true);
     const replayBox = await page.locator("#replay").boundingBox();
     const cardBox = await page.locator("#result-card").boundingBox();
     await expect(page.locator("#result-card #replay")).toBeVisible();
@@ -159,14 +176,25 @@ for (const outcome of ["win", "loss"]) {
     await page.locator("#settings-open").click();
     await page.locator('[data-language="en"]').click();
     await expect(page.locator(".result-note #title")).toHaveText(outcome === "win" ? "You won" : "You lost");
+    expect(await flame.evaluate(node => node.isConnected)).toBe(true);
     expect(await boardPositions()).toEqual(initialPositions);
     await expect(page.locator("#player-title")).toHaveText("Me");
     await page.locator('[data-language="pl"]').click();
     await page.keyboard.press("Escape");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    expect(await page.locator(".battle-effects").evaluateAll(layers =>
+      layers.every(layer => layer.getAnimations({ subtree: true }).length === 0))).toBe(true);
+    expect(await page.locator(".firework-burst").first().evaluate(node => getComputedStyle(node).opacity)).toBe("1");
+    expect(await page.locator(".firework-burst").evaluateAll(bursts => bursts.every(burst => {
+      const frame = burst.closest("svg").getBoundingClientRect(), box = burst.getBoundingClientRect();
+      return box.left >= frame.left && box.right <= frame.right && box.top >= frame.top && box.bottom <= frame.bottom;
+    }))).toBe(true);
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.locator("#replay").click();
     await expect(page.locator("#title")).toHaveText("statki");
     await expect(page.locator("#result-card")).not.toHaveClass(/result-note/);
     await expect(page.locator("#opponent-setup")).toBeVisible();
+    await expect(page.locator(".battle-effects")).toHaveCount(0);
     await expect(page.locator(".board-status:visible")).toHaveCount(0);
     await page.locator("#start").click();
     await expect(page.locator("#enemy-status")).toHaveText("Atakujesz");
