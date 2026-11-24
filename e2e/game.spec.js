@@ -202,6 +202,38 @@ for (const outcome of ["win", "loss"]) {
   });
 }
 
+test("a fresh hit draws two strokes once and respects reduced motion", async ({ page }) => {
+  await prepare(page);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.locator("#start").click();
+  const targets = enemyFleet();
+  const shoot = index => page.locator("#enemy-board").getByRole("button", {
+    name: `${targets[index]}: nieodkryte`, exact: true,
+  }).evaluate(cell => {
+    cell.click();
+    return cell.getAnimations({ subtree: true }).map(animation => {
+      const { delay, duration } = animation.effect.getTiming();
+      return { delay, duration, offsets: animation.effect.getKeyframes().map(frame => frame.strokeDashoffset) };
+    }).sort((a, b) => a.delay - b.delay);
+  });
+  const strokes = await shoot(0);
+  expect(strokes).toHaveLength(2);
+  expect(strokes[0].delay).toBe(0);
+  for (const stroke of strokes) expect(stroke.offsets.map(parseFloat)).toEqual([1.05, 0]);
+  expect(strokes[1].delay).toBeGreaterThan(strokes[0].duration);
+  expect(strokes[1].delay + strokes[1].duration).toBeLessThan(400);
+  const first = page.locator("#enemy-board .pen-cross").first();
+  await expect.poll(() => first.evaluate(mark => mark.getAnimations({ subtree: true }).length)).toBe(0);
+  const pathLengths = await first.locator("use").evaluateAll(strokes => strokes.map(stroke => stroke.getBBox().width));
+  expect(pathLengths.every(width => width > 25)).toBe(true);
+  const original = await first.elementHandle();
+  expect(await shoot(1)).toHaveLength(2);
+  expect(await original.evaluate(mark => mark.getAnimations({ subtree: true }).length)).toBe(0);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(await shoot(2)).toHaveLength(0);
+  await expect(page.locator("#enemy-board .pen-cross")).toHaveCount(3);
+});
+
 for (const mobile of [false, true]) {
   test(`hit and sunk stay distinct on both boards (${mobile ? "touch" : "keyboard"})`, async ({ browser }) => {
     test.setTimeout(120000);
@@ -273,10 +305,10 @@ for (const mobile of [false, true]) {
           await expect(page.locator(`#${board}-board .miss`).first()).toHaveText("·");
           const ink = await page.locator(`#${board}-board .sunk`).first().evaluate(cell => ({
             fill: getComputedStyle(cell).backgroundImage,
-            cross: getComputedStyle(cell.querySelector(".pen-cross"), "::before").maskImage,
+            strokes: cell.querySelectorAll(".pen-cross svg use").length,
           }));
           expect(ink.fill).toBe("none");
-          expect(ink.cross).not.toBe("none");
+          expect(ink.strokes).toBe(2);
         }
       }
       if (shot >= 14 && await page.evaluate(() => window.readabilityTransitions.every(Boolean))) break;

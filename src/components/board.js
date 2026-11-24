@@ -1,6 +1,15 @@
 import { t } from "../i18n.js";
 import { coordinate } from "../engine/board.js";
 import { createBattleEffects } from "./battle-effects.js";
+import crossUrl from "/pen-cross.svg?url";
+
+const cross = document.createElement("template");
+cross.innerHTML = [
+  "<svg viewBox=\"0 0 40 40\" aria-hidden=\"true\" focusable=\"false\">",
+  `<use href="${crossUrl}#down-right"></use>`,
+  `<use href="${crossUrl}#down-left"></use>`,
+  "</svg>",
+].join("");
 
 const labels = {
   unknown: "nieodkryte",
@@ -91,7 +100,13 @@ export function createBoard(element, onShot) {
         const marked = cell.state === "hit" || cell.state === "sunk";
         const mark = button.firstElementChild;
         mark.className = `cell-mark${marked ? " pen-cross" : ""}`;
-        mark.textContent = marked ? "×" : ["miss", "blocked"].includes(cell.state) ? "·" : "";
+        if (marked) {
+          if (!mark.firstElementChild) {
+            mark.replaceChildren("×", cross.content.cloneNode(true));
+          }
+        } else {
+          mark.textContent = ["miss", "blocked"].includes(cell.state) ? "·" : "";
+        }
         button.disabled = !interactive || cell.state !== "unknown";
         button.setAttribute(
           "aria-label",
