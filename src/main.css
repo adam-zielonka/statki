@@ -73,8 +73,7 @@ button:focus-visible, a:focus-visible {
   margin: auto;
   padding: 0 var(--sheet-padding) 8px;
 }
-/* Extend the same scrolling paper to both viewport edges, even when the game
-   itself is narrower. The board-aligned grid continues through the margins. */
+/* On smaller screens the board-aligned paper fills the viewport. */
 #app::before {
   --grid-start: calc((100cqw - var(--sheet-columns) * var(--square)) / 2 - .5px);
   content: "";
@@ -90,9 +89,9 @@ button:focus-visible, a:focus-visible {
     linear-gradient(#cf4b55, #cf4b55),
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 1px 100%, var(--square) var(--square), var(--square) var(--square);
+  background-size: var(--margin-size, 1px 100%), var(--square) var(--square), var(--square) var(--square);
   background-position:
-    calc(var(--grid-start) - var(--square)) 0,
+    var(--margin-position, calc(var(--grid-start) - var(--square)) 0),
     var(--grid-start) -.5px,
     var(--grid-start) -.5px;
   background-repeat: no-repeat, repeat, repeat;
@@ -573,6 +572,50 @@ body:has(dialog[open]) { overflow: hidden; }
 .rules li { counter-increment: brief; position: relative; padding-left: 28px; margin-bottom: 14px; color: var(--muted); font-size: 12px; line-height: 1.8; }
 .rules li::before { content: "0" counter(brief); position: absolute; left: 0; color: var(--green); font: 700 21px/1.4 var(--hand); }
 .rules strong { color: var(--ink); font-weight: 600; }
+@media (min-width: 1001px) {
+  :root { background: #b37a49; }
+  body {
+    display: grid;
+    min-height: 100dvh;
+    padding: 20px 0 36px;
+    background: #b37a49 url("/wooden-desk.webp") center / cover no-repeat;
+  }
+  #app {
+    --sheet-max-width: min(calc(100cqw - 48px), clamp(900px, 125dvh, 1200px));
+    --sheet-padding: 56px;
+    min-height: auto;
+    --binding-space: 34px;
+    padding-bottom: var(--binding-space);
+    border-radius: 5px 9px 7px 5px;
+    background: linear-gradient(to bottom right, #fffdf4, #fcfaf3 36%, #f6f2e7 70%, #e8e1d3);
+    box-shadow:
+      0 1px 1px #8b897e, 0 4px #f7f4e8, 0 5px #b9b5a8,
+      0 8px #536979, 0 10px #3e515e, 6px 15px 22px #39352b38;
+  }
+  #app::before {
+    --grid-start: calc(var(--sheet-padding) - .5px);
+    --margin-size: 100% 1px;
+    --margin-position: left 0 bottom calc(var(--binding-space) - .5px);
+    left: 0;
+    width: 100%;
+    border-radius: inherit;
+    background-color: transparent;
+  }
+  /* End the legend on a grid line, where the binding margin begins. */
+  .legend {
+    min-height: var(--square);
+    align-items: center;
+    margin: 0;
+  }
+  #app::after {
+    content: "";
+    position: absolute;
+    inset: auto var(--sheet-padding) -17px;
+    height: 34px;
+    background: url("/notebook-ring.svg") left center / var(--square) 34px space no-repeat;
+    pointer-events: none;
+  }
+}
 @media (max-width: 1000px) {
   #app { --sheet-padding: 24px; }
   h1 { font-size: 48px; }

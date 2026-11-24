@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 
-for (const width of [320, 390, 844, 1280]) {
+for (const [width, height] of [[320, 844], [390, 844], [844, 390], [1280, 720], [1366, 768], [1920, 1080]]) {
   test(`setup and battle fit at ${width}px in both languages`, async ({ page }) => {
-    await page.setViewportSize({ width, height: width === 844 ? 390 : 844 });
+    await page.setViewportSize({ width, height });
     const errors = [];
     page.on("pageerror", error => errors.push(error.message));
     await page.goto("./");
@@ -14,13 +14,44 @@ for (const width of [320, 390, 844, 1280]) {
         return {
           left, right: left + parseFloat(paper.width),
           top: rect.top + parseFloat(paper.top), bottom: rect.bottom,
+          gridY: parseFloat(paper.backgroundPositionY.split(",")[1]),
+          square: parseFloat(paper.backgroundSize.split(",")[1]),
+          marginSize: paper.backgroundSize.split(",")[0],
+          marginY: paper.backgroundPositionY.split(",")[0],
           viewportWidth: document.documentElement.clientWidth, viewportHeight: innerHeight,
         };
       });
-      expect(Math.abs(coverage.left)).toBeLessThan(0.2);
-      expect(Math.abs(coverage.right - coverage.viewportWidth)).toBeLessThan(0.2);
-      expect(coverage.top).toBeLessThanOrEqual(0.2);
-      expect(coverage.bottom).toBeGreaterThanOrEqual(coverage.viewportHeight - 0.2);
+      if (width >= 1001) {
+        expect(coverage.left).toBeGreaterThan(12);
+        expect(coverage.right).toBeLessThan(width - 12);
+        expect(coverage.right - coverage.left).toBeGreaterThan(coverage.bottom - coverage.top);
+        expect(coverage.top).toBeGreaterThan(0);
+        const binding = await page.locator("#app").evaluate(sheet => {
+          const style = getComputedStyle(sheet, "::after");
+          const bottom = sheet.getBoundingClientRect().bottom - parseFloat(style.bottom);
+          return { image: style.backgroundImage, bottom, top: bottom - parseFloat(style.height) };
+        });
+        expect(binding.image).toContain("notebook-ring.svg");
+        expect(binding.bottom).toBeLessThan(coverage.viewportHeight);
+        const legendItems = await page.locator(".legend > span").all();
+        expect(coverage.marginSize).toBe("100% 1px");
+        const bottomOffset = coverage.marginY.match(/^calc\(100% - ([\d.]+)px\)$/);
+        expect(bottomOffset).toBeTruthy();
+        const marginY = coverage.bottom - Number(bottomOffset[1]) - 1;
+        const gridRow = (marginY - coverage.top - coverage.gridY) / coverage.square;
+        expect(gridRow).toBeCloseTo(Math.round(gridRow), 6);
+        for (const item of legendItems) {
+          const box = await item.boundingBox();
+          expect(box.y + box.height).toBeLessThan(marginY);
+        }
+        expect(marginY + 1).toBeLessThan(binding.top);
+      } else {
+        expect(coverage.marginSize).toBe("1px 100%");
+        expect(Math.abs(coverage.left)).toBeLessThan(0.2);
+        expect(Math.abs(coverage.right - coverage.viewportWidth)).toBeLessThan(0.2);
+        expect(coverage.top).toBeLessThanOrEqual(0.2);
+        expect(coverage.bottom).toBeGreaterThanOrEqual(coverage.viewportHeight - 0.2);
+      }
       const title = await page.locator("#title").boundingBox();
       for (const button of await page.locator(".masthead button:visible").all()) {
         const box = await button.boundingBox();
@@ -74,7 +105,6 @@ for (const width of [320, 390, 844, 1280]) {
             const errors = [
               Math.abs(square - Math.round(square)),
               Math.abs(parseFloat(paper.backgroundSize.split(",")[1]) - square),
-              Math.abs(boardLeft - marginX - 2 * square),
               offGrid(rect.left + axisWidth - paperX),
               offGrid(rect.top + axisHeight - paperY),
               Math.abs(parseFloat(frame.left) - axisWidth),
@@ -82,6 +112,9 @@ for (const width of [320, 390, 844, 1280]) {
               Math.abs(parseFloat(frame.width) - 10 * square),
               Math.abs(parseFloat(frame.height) - 10 * square),
             ];
+            if (paper.backgroundSize.startsWith("1px 100%")) {
+              errors.push(Math.abs(boardLeft - marginX - 2 * square));
+            }
             return errors.concat([...grid.querySelectorAll(".cell")].map(cell => {
               const box = cell.getBoundingClientRect();
               return Math.max(
