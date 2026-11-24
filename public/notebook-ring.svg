@@ -1,6 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 34">
-  <ellipse cx="18" cy="6" rx="5.2" ry="3.7" fill="#b7b4a7"/>
-  <ellipse cx="18" cy="6.5" rx="4" ry="2.7" fill="#40454a"/>
-  <path d="M18 6c-4 4-5 14-2 20 2 5 6 6 9 2 2-2 3-5 3-8" fill="none" stroke="#39434a" stroke-width="4.4" stroke-linecap="round"/>
-  <path d="M17.6 7c-3.7 4.7-4 14-1.5 19.1 2 4 5 5 7.3 2.4" fill="none" stroke="#bcc4c6" stroke-width="1.6" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 38" fill="none">
+  <defs>
+    <linearGradient id="steel" x1="11" y1="11" x2="25" y2="28" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#514f49"/>
+      <stop offset=".13" stop-color="#e0ded2"/>
+      <stop offset=".24" stop-color="#fffef8"/>
+      <stop offset=".43" stop-color="#abb3b3"/>
+      <stop offset=".64" stop-color="#626b70"/>
+      <stop offset=".82" stop-color="#ebeee9"/>
+      <stop offset="1" stop-color="#686963"/>
+    </linearGradient>
+    <radialGradient id="hole" cx=".62" cy=".78" r=".82">
+      <stop stop-color="#656154"/><stop offset=".75" stop-color="#302e29"/><stop offset="1" stop-color="#211e1b"/>
+    </radialGradient>
+    <filter id="shadow" x="-60%" y="-25%" width="250%" height="170%">
+      <feGaussianBlur stdDeviation="1.15"/>
+    </filter>
+    <path id="wire" d="M17.1 7.4C14.2 8.1 12.5 14.3 12.8 20.4C13.1 27.3 15.7 33.4 20.1 33.4C22.6 33.4 24.1 32.2 25 30.5"/>
+  </defs>
+  <ellipse cx="17.7" cy="7.8" rx="5" ry="3.6" fill="#fff8e5"/>
+  <ellipse cx="17.6" cy="7.1" rx="4.8" ry="3.3" fill="url(#hole)"/>
+  <g stroke-linecap="round">
+    <use href="#wire" transform="translate(2.5 1.8)" stroke="#3b3025" stroke-width="4.4" opacity=".46" filter="url(#shadow)"/>
+    <use href="#wire" stroke="#484c4d" stroke-width="4.5"/>
+    <use href="#wire" stroke="url(#steel)" stroke-width="3.6"/>
+    <path d="M16.5 7.8C13.1 10.5 12.1 16.7 12.6 21" stroke="#fffdf2" stroke-width=".85"/>
+  </g>
 </svg>
